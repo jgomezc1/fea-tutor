@@ -1,0 +1,268 @@
+{
+  "nodes": {
+    "element_stiffness": {
+      "title": "Element Stiffness Matrix",
+      "prerequisites": ["spring_behavior", "matrix_algebra"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Derive the 2x2 stiffness matrix for a single spring from equilibrium",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain why diagonal terms are positive and equal to k, and off-diagonal terms are negative",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Explain the physical meaning of each column of the stiffness matrix as a unit displacement case",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Confusing the element stiffness matrix with the global stiffness matrix",
+        "M2": "Not understanding why the matrix is singular (thinking it is an error)",
+        "M3": "Believing the stiffness matrix depends on the applied forces"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Starts from or references equilibrium at individual nodes",
+          "Discusses direction of spring force on each node",
+          "Explains signs of matrix entries through force directions",
+          "Notes that columns sum to zero and explains why (overall equilibrium of free body)",
+          "Uses 'if I displace this node, the spring does X' reasoning"
+        ],
+        "negative": [
+          "Writes the matrix directly without derivation",
+          "Says 'I remember it is [[k, -k], [-k, k]]'",
+          "Justifies signs by 'the pattern' or 'diagonal positive, off-diagonal negative'",
+          "Cites the formula f = kx without connecting to nodal forces"
+        ]
+      }
+    },
+    "local_global_dofs": {
+      "title": "Local vs. Global DOFs",
+      "prerequisites": ["element_stiffness"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Identify the local and global degree of freedom numbering for a given spring system",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Construct the connectivity mapping between local element DOFs and global system DOFs",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Explain why this mapping is necessary — elements don't know about the global system and the mapping is what connects them",
+          "blooms_level": "understand"
+        },
+        "LO4": {
+          "description": "Given a system with N nodes, determine the total number of global DOFs and which elements contribute to each",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking that local node 1 must always correspond to the lower-numbered global node",
+        "M2": "Confusing DOF numbering with physical position (assuming DOF 1 is always the leftmost node)",
+        "M3": "Not understanding that the same global DOF appears in multiple element stiffness matrices — this is what creates coupling",
+        "M4": "Believing the connectivity is a property of the element rather than an assignment we make"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that each element only knows its local DOFs and the connectivity map translates to the global system",
+          "Identifies shared nodes as the mechanism of inter-element communication",
+          "Connects the connectivity map to physical attachment (node feels forces from all connected springs)",
+          "Explains why the element matrix form is always the same regardless of global position"
+        ],
+        "negative": [
+          "Writes connectivity maps correctly but cannot explain what they mean physically",
+          "Thinks the element stiffness matrix changes depending on its global position",
+          "Treats connectivity as a purely bookkeeping exercise without physical significance"
+        ]
+      }
+    },
+    "assembly": {
+      "title": "Assembly",
+      "prerequisites": ["local_global_dofs"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Expand an element stiffness matrix from local (2x2) to global size (NxN) using the connectivity map — placing entries in the correct rows and columns",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Assemble the global stiffness matrix by summing the expanded element contributions",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Explain physically why contributions from different elements add at shared DOFs — forces from multiple springs acting on the same node superpose",
+          "blooms_level": "understand"
+        },
+        "LO4": {
+          "description": "Verify properties of the assembled matrix: symmetry, column/row sums equal to zero for the free system, and singularity before boundary conditions",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking assembly is concatenation (block diagonal placement) rather than overlapping summation at shared DOFs",
+        "M2": "Not understanding why shared DOFs accumulate stiffness from multiple elements — treating the overlap as an error or double-counting",
+        "M3": "Expecting the assembled global matrix to be invertible before applying boundary conditions",
+        "M4": "Assembling element matrices in the wrong positions because of connectivity map errors"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that shared DOFs accumulate stiffness because the node feels forces from all connected elements",
+          "Uses superposition reasoning: the force at a node is the sum of contributions from all connected springs",
+          "Connects the banded structure of the assembled matrix to the physical connectivity of the system",
+          "Explains singularity as rigid body modes of the unsupported system",
+          "Verifies the assembly by checking that column sums are zero (free body equilibrium)"
+        ],
+        "negative": [
+          "Places element matrices without explaining why entries go where they do",
+          "Treats assembly as a mechanical procedure without physical interpretation",
+          "Says entries 'add up' without explaining why (superposition of forces)",
+          "Cannot predict the structure of the assembled matrix before computing it"
+        ]
+      }
+    },
+    "boundary_conditions": {
+      "title": "Boundary Conditions",
+      "prerequisites": ["assembly"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Apply displacement boundary conditions to the global system by modifying rows and columns using the elimination approach",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain physically why the unmodified global matrix is singular and why applying BCs makes it invertible — removing rigid body modes by providing a spatial reference",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Distinguish between essential (displacement) and natural (force) boundary conditions, and understand that force BCs appear on the right-hand side while displacement BCs modify the left-hand side",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Recover reaction forces at constrained DOFs after solving the reduced system",
+          "blooms_level": "apply"
+        }
+      },
+      "misconceptions": {
+        "M1": "Applying boundary conditions before assembly — modifying element matrices instead of the global system",
+        "M2": "Confusing force BCs with displacement BCs — trying to impose a known force by modifying the stiffness matrix",
+        "M3": "Not understanding that the singular matrix is correct and expected before BCs — thinking the assembly went wrong",
+        "M4": "Forgetting to recover reactions — solving for displacements and stopping",
+        "M5": "Thinking that applying BCs 'fixes' a broken matrix rather than understanding it removes the physical rigid body freedom"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that BCs provide a spatial reference that eliminates rigid body modes",
+          "Connects the elimination of rows/columns to physically removing a DOF from the system",
+          "Distinguishes between 'this node cannot move' (displacement BC) and 'this node has a known force' (force BC)",
+          "Explains reactions as the forces the supports must exert to maintain the prescribed displacement",
+          "Understands that the reduced system describes only the free nodes"
+        ],
+        "negative": [
+          "Applies BCs as a mathematical recipe without physical interpretation",
+          "Says 'we delete rows and columns to make the matrix invertible' without explaining why it was singular",
+          "Treats reactions as an afterthought rather than a physical quantity of interest",
+          "Cannot explain the difference between prescribing a displacement and prescribing a force"
+        ]
+      }
+    },
+    "solution": {
+      "title": "Solution and Back-Substitution",
+      "prerequisites": ["boundary_conditions"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Solve the reduced system of equations for the unknown displacements",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Back-substitute the computed displacements into the element stiffness equations to recover internal element forces — extension and spring force for each element",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Compute reaction forces at the constrained nodes using the full global system",
+          "blooms_level": "apply"
+        },
+        "LO4": {
+          "description": "Interpret the signs of displacements, element forces, and reactions physically — direction of movement, tension vs compression, direction of support forces",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Stopping after solving for displacements and not recovering element forces or reactions",
+        "M2": "Confusing element forces with nodal forces — the internal force in a spring is not the same as the external force applied to a node",
+        "M3": "Sign convention errors when interpreting tension vs compression",
+        "M4": "Computing reactions incorrectly by using the reduced system instead of the full system",
+        "M5": "Not checking whether the results make qualitative physical sense before trusting the numbers"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Predicts qualitative behavior before solving (which way should each node move, which springs should be in tension)",
+          "Distinguishes between displacement solution, element forces, and reactions as three different physical quantities",
+          "Interprets signs consistently: displacement direction, tension or compression, reaction direction",
+          "Checks the solution against physical intuition as a verification step"
+        ],
+        "negative": [
+          "Solves the equations and reports numbers without physical interpretation",
+          "Cannot explain what a positive or negative displacement means for a specific node",
+          "Confuses the force in a spring with the external load at a node",
+          "Cannot predict even the qualitative direction of displacements before solving"
+        ]
+      }
+    },
+    "verification": {
+      "title": "Verification and Interpretation",
+      "prerequisites": ["solution"],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Verify global equilibrium — confirm that the sum of all external forces (applied loads plus reactions) equals zero",
+          "blooms_level": "analyze"
+        },
+        "LO2": {
+          "description": "Verify element-level equilibrium — confirm that every node individually satisfies force balance",
+          "blooms_level": "analyze"
+        },
+        "LO3": {
+          "description": "Predict qualitative behavior before solving and use it to catch errors — which way should nodes move, which springs should be in tension",
+          "blooms_level": "evaluate"
+        },
+        "LO4": {
+          "description": "Identify when results are physically unreasonable and diagnose the likely source of error",
+          "blooms_level": "evaluate"
+        }
+      },
+      "misconceptions": {
+        "M1": "Assuming the computed answer is always correct without verification — trusting the math blindly",
+        "M2": "Not checking units or dimensional consistency",
+        "M3": "Not being able to predict qualitative behavior before solving — treating FEA as a black box",
+        "M4": "Thinking that equilibrium checks are optional rather than a professional requirement",
+        "M5": "Confusing a verification check with a derivation — verification uses an independent path, not repetition"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Treats verification as mandatory and non-negotiable",
+          "Uses qualitative prediction as an independent check against computed results",
+          "Can identify specific error sources when results are unreasonable",
+          "Understands that equilibrium must hold at every level: element, node, and global",
+          "Recognizes that a correct FEA result must be self-consistent across all levels"
+        ],
+        "negative": [
+          "Treats verification as an afterthought or academic exercise",
+          "Cannot predict even the qualitative direction of displacements",
+          "Accepts unreasonable results without questioning them",
+          "Only checks global equilibrium and ignores node-level balance",
+          "Cannot diagnose the source of an error when results are wrong"
+        ]
+      }
+    }
+  },
+  "edges": [
+    ["element_stiffness", "local_global_dofs"],
+    ["local_global_dofs", "assembly"],
+    ["assembly", "boundary_conditions"],
+    ["boundary_conditions", "solution"],
+    ["solution", "verification"]
+  ],
+  "entry_prerequisites": {
+    "element_stiffness": ["spring_behavior", "matrix_algebra"]
+  }
+}

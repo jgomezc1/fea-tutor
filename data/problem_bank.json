@@ -1,0 +1,979 @@
+{
+  "problems": {
+    "ES_A": {
+      "problem_id": "ES_A",
+      "node": "element_stiffness",
+      "targets_los": ["LO1"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "A linear spring with stiffness k = 200 N/m connects node 1 (left) to node 2 (right). The displacements of nodes 1 and 2 are u1 and u2 respectively. Derive the element stiffness matrix that relates the nodal forces [F1, F2]^T to the nodal displacements [u1, u2]^T.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Establish the spring extension",
+          "content": "delta = u2 - u1 (extension is positive when the spring gets longer)",
+          "physical_reasoning": "If node 2 moves further right than node 1, the spring stretches. The extension is the relative displacement."
+        },
+        {
+          "step": 2,
+          "description": "Write the internal spring force",
+          "content": "f = k * delta = k(u2 - u1) = 200(u2 - u1)",
+          "physical_reasoning": "The spring resists extension. A positive f means the spring is in tension — it pulls its endpoints inward."
+        },
+        {
+          "step": 3,
+          "description": "Apply equilibrium at node 1",
+          "content": "F1 = -f = -k(u2 - u1) = k*u1 - k*u2",
+          "physical_reasoning": "If the spring is in tension (f > 0), it pulls node 1 to the right — toward node 2. The external force F1 needed to maintain equilibrium at node 1 is the reaction: F1 = -k(u2 - u1) = k*u1 - k*u2."
+        },
+        {
+          "step": 4,
+          "description": "Apply equilibrium at node 2",
+          "content": "F2 = f = k(u2 - u1) = -k*u1 + k*u2",
+          "physical_reasoning": "By Newton's third law, the force on node 2 is opposite to the force on node 1 from the spring's perspective. The spring pulls node 2 toward node 1 when in tension. The external force F2 = -k*u1 + k*u2."
+        },
+        {
+          "step": 5,
+          "description": "Assemble into matrix form",
+          "content": "[F1, F2]^T = [[k, -k], [-k, k]] [u1, u2]^T = [[200, -200], [-200, 200]] [u1, u2]^T",
+          "physical_reasoning": "Each column has a physical meaning. Column 1: set u1 = 1, u2 = 0 — the forces you need to apply to create that displacement state. Column 2: set u2 = 1, u1 = 0. Notice each column sums to zero — that is equilibrium. No net force on the free-floating spring."
+        }
+      ],
+      "final_answer": "K = [[200, -200], [-200, 200]]",
+      "expert_narration": "Let's build this from scratch using nothing but equilibrium. I am not going to memorize a formula — I want to derive it from physics every time, because that is how you will catch errors in real problems.\n\nI have a spring connecting two nodes. The first thing I always ask myself is: what is the spring extension? It is the relative displacement, u2 minus u1. Simple, but be careful with the sign — I am defining positive extension as the spring getting longer.\n\nNow, the spring force is k times that extension. But here is where students often get confused: I need the forces *at the nodes*, not just the internal spring force. So I go node by node.\n\nAt node 1: I ask myself, if the spring is stretched (u2 > u1), which way does it pull node 1? Toward node 2 — to the right — positive direction. So F1 = k(u1 - u2)... wait, let me check the sign. If u2 > u1, the spring pulls node 1 right, so F1 should be... actually, let me think about this as the *external* force required at node 1. If the spring pulls node 1 to the right, I need an external force to the left to maintain equilibrium...\n\nYou see what I am doing here? I am arguing with myself about signs. This is normal. This is what experts actually do — we don't just write down the answer, we check our reasoning at every step. Let me resolve this carefully.\n\nThe spring internal force is f = k(u2 - u1). When f > 0 the spring is in tension. At node 1, the spring exerts a pull toward node 2. The external nodal force F1 must balance everything at node 1. Working through it: F1 = k*u1 - k*u2.\n\nAt node 2: by the same equilibrium reasoning (or by Newton's third law), F2 = -k*u1 + k*u2.\n\nPutting it in matrix form: [F1, F2]^T = [[k, -k], [-k, k]] [u1, u2]^T.\n\nLet me verify: each column sums to zero. That is equilibrium of the whole free spring — no net external force. The diagonal terms are positive — you need to push a node in the direction of its displacement to maintain it against the spring. The off-diagonal terms are negative — displacing one node creates a force on the other node in the opposite direction. Everything checks out physically.",
+      "scaffolded_versions": {
+        "level_3": "The stiffness matrix has the form [[a, b], [c, d]]. I will help you start. At node 1, equilibrium gives F1 = k*u1 - k*u2. From this, what are a and b? Now derive F2 using the same approach to find c and d.",
+        "level_2": "Start by writing the spring extension in terms of u1 and u2. Then ask yourself: what force does the spring exert on node 1? Use equilibrium.",
+        "level_1": "Derive the element stiffness matrix for this spring. Show your reasoning at each node using equilibrium."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Starts from or references equilibrium at individual nodes",
+          "Discusses direction of spring force on each node",
+          "Explains signs of matrix entries through force directions",
+          "Notes that columns sum to zero and explains why (overall equilibrium of free body)",
+          "Uses 'if I displace this node, the spring does X' reasoning"
+        ],
+        "negative": [
+          "Writes the matrix directly without derivation",
+          "Says 'I remember it is [[k, -k], [-k, k]]'",
+          "Justifies signs by 'the pattern' or 'diagonal positive, off-diagonal negative'",
+          "Cites the formula f = kx without connecting to nodal forces"
+        ]
+      }
+    },
+    "ES_B": {
+      "problem_id": "ES_B",
+      "node": "element_stiffness",
+      "targets_los": ["LO2", "LO3"],
+      "targets_misconceptions": [],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "You are given the element stiffness matrix for a spring of stiffness k:\n\nK = [[k, -k], [-k, k]]\n\nWithout re-deriving it, answer the following:\n(a) What is the physical meaning of the first column of this matrix?\n(b) Why are the diagonal terms positive and the off-diagonal terms negative? Explain using forces, not algebra.\n(c) What is the sum of each column? What does this tell you physically?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Interpret the first column",
+          "content": "The first column [k, -k]^T represents the forces at nodes 1 and 2 when u1 = 1 and u2 = 0.",
+          "physical_reasoning": "Imagine pushing node 1 one unit to the right while holding node 2 fixed. The spring compresses. It pushes back on node 1 (force = +k, opposing the displacement) and pushes node 2 to the left (force = -k). The column is literally the answer to: what forces do I need to apply to maintain this displacement configuration?"
+        },
+        {
+          "step": 2,
+          "description": "Explain the signs",
+          "content": "K11 = k is positive because displacing node 1 creates a restoring force at node 1. K21 = -k is negative because displacing node 1 creates a force at node 2 opposite to u1's direction.",
+          "physical_reasoning": "Every diagonal term says 'how hard do I have to push this node to maintain its own displacement against the spring.' That is always positive — the spring always resists. Every off-diagonal term says 'what does displacing that node do to this node.' The spring transfers the force in the opposite sense."
+        },
+        {
+          "step": 3,
+          "description": "Column sum",
+          "content": "Each column sums to zero: k + (-k) = 0.",
+          "physical_reasoning": "This is global equilibrium. If the spring is floating in space with no supports, the net external force must be zero — otherwise the whole system would accelerate. The fact that each column sums to zero is Newton's second law for a body with no net acceleration."
+        }
+      ],
+      "final_answer": "(a) Forces for unit displacement of node 1 with node 2 fixed. (b) Diagonal: restoring force (positive). Off-diagonal: transmitted force in opposite direction (negative). (c) Sum is zero: free body equilibrium.",
+      "expert_narration": "I love this question because it tests whether you really understand the matrix or just memorized it. Let me think about column 1. The matrix equation says Ku = F. If I set u = [1, 0]^T, then F = K times [1, 0]^T, which is just the first column. So physically I am asking: what happens if I push node 1 one unit to the right while nailing node 2 in place?\n\nThe spring gets compressed by one unit. It pushes back on node 1 — it does not want to be compressed — so I need a force of +k to the right at node 1 to hold it there. At node 2, the compressed spring is pushing node 2 to the left, but I am holding it fixed, so the reaction force is -k. I need to push node 2 to the left to keep it from moving.\n\nNow the signs of the diagonal and off-diagonal terms. The diagonal term K11 = k tells me: to displace node 1 positively, I must apply a positive force there. The spring resists — it always fights you. That is why diagonal terms are always positive. The off-diagonal K21 = -k tells me: displacing node 1 positively causes the spring to push node 2, and the direction it pushes is opposite to my original push. That is the nature of a spring connecting two points — it couples them in opposition.\n\nAnd the column sums to zero. This one is beautiful — it is just equilibrium of the whole spring as a free body. No supports, no net force. If you ever build a stiffness matrix and the columns do not sum to zero, something is wrong.",
+      "scaffolded_versions": {
+        "level_3": "For part (a), imagine setting u1 = 1 and u2 = 0 in the equation F = Ku. What does F equal? Now describe that scenario physically — what are you doing to the spring?",
+        "level_2": "Think about what each column represents in the equation F = Ku. What specific displacement state does the first column correspond to?",
+        "level_1": "Answer all three parts. Use physical reasoning — I want to hear about forces and displacements, not algebra."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Uses unit displacement thought experiment ('if I set u1 = 1 and u2 = 0...')",
+          "Explains diagonal terms as restoring forces or resistance to displacement",
+          "Explains off-diagonal terms as coupling forces transmitted through the spring",
+          "Connects column sum to equilibrium of the free body",
+          "Distinguishes between 'the spring pushes' and 'the external force I need to apply'"
+        ],
+        "negative": [
+          "Says 'diagonal is positive because k is positive'",
+          "Explains column sum as 'they cancel out' without physical reasoning",
+          "Cannot articulate the unit displacement experiment",
+          "Describes the matrix pattern without connecting to forces"
+        ]
+      }
+    },
+    "ES_C": {
+      "problem_id": "ES_C",
+      "node": "element_stiffness",
+      "targets_los": ["LO2", "LO3"],
+      "targets_misconceptions": ["M2"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY", "REMEDIATE"],
+      "statement": "Consider the same spring element with stiffness k.\n\n(a) Can you solve for the displacements u1 and u2 if I tell you the forces are F1 = 100 N and F2 = -100 N? Try it.\n(b) Now try solving for displacements if F1 = 100 N and F2 = 50 N. What happens? Why?\n(c) What does this tell you about the element stiffness matrix? Is something wrong with it?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Attempt part (a)",
+          "content": "Ku = F gives [[k, -k], [-k, k]] [u1, u2]^T = [100, -100]^T. First equation: k*u1 - k*u2 = 100, so k(u1 - u2) = 100, giving u1 - u2 = 100/k. Cannot find u1 and u2 individually — only their difference.",
+          "physical_reasoning": "The forces are equal and opposite — valid loading for a free spring. The spring tells us how much it stretches but cannot tell us where it is in space. Infinite solutions, all with the same relative displacement."
+        },
+        {
+          "step": 2,
+          "description": "Attempt part (b)",
+          "content": "Ku = F gives k*u1 - k*u2 = 100 from row 1, and -k*u1 + k*u2 = 50 from row 2. Adding: 0 = 150. Contradiction. No solution exists.",
+          "physical_reasoning": "F1 + F2 = 150 != 0. Asking the spring to sustain a net force, but a free spring cannot do that — it would just accelerate. The matrix is correctly rejecting a physically impossible scenario."
+        },
+        {
+          "step": 3,
+          "description": "Interpret the singularity",
+          "content": "The matrix is singular (det = k^2 - k^2 = 0). It has a null space — the rigid body mode [1, 1]^T representing both nodes moving equally.",
+          "physical_reasoning": "The matrix is singular not because something is wrong, but because it correctly represents the physics of an unsupported element. A free spring can translate rigidly without any internal forces. The singularity goes away once we apply boundary conditions, which remove the rigid body mode."
+        }
+      ],
+      "final_answer": "(a) Infinite solutions — can only determine relative displacement. (b) No solution — loading violates free body equilibrium. (c) Matrix is singular due to rigid body mode. This is physically correct, not an error.",
+      "expert_narration": "This problem is a trap — in the best possible way. Part (a) seems like it should be straightforward. Let me try to solve it. I set up Ku = F and... I cannot get unique values for u1 and u2. Only their difference. My first instinct might be to think I made an error, but let me think physically. The spring is floating in space. If I apply equal and opposite forces, it stretches by F/k. But where is it? I have no idea — I have not fixed it to anything. So the infinite solutions make perfect physical sense.\n\nPart (b) is even more revealing. The forces do not add up to zero. I am trying to push the spring to the right with a net force of 150 N. But there is nothing resisting that — no wall, no support. The spring would just accelerate forever. The equations say 0 = 150, which is mathematics telling me 'this is physically impossible.'\n\nSo is something wrong with the matrix? Absolutely not. The matrix is singular, yes. The determinant is zero. But this is the matrix telling the truth: an unsupported spring has a rigid body mode. It can translate freely. You cannot determine absolute positions without a reference point. This is not a bug — this is the physics. And this is exactly why we need boundary conditions, which we will get to next.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Try solving Ku = F for part (a). When you get stuck, ask yourself: physically, is there a unique answer? Can you describe a scenario where the spring satisfies the equations but the nodes are in different positions?",
+        "level_1": "Work through all three parts. Pay close attention to what the mathematics is telling you about the physics."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Identifies that infinite solutions in (a) correspond to rigid body translation",
+          "Recognizes that (b) fails because the loading violates free body equilibrium",
+          "Connects singularity to the existence of a rigid body mode, not to a defect",
+          "Explains that boundary conditions will remove the singularity",
+          "Can describe the null space vector [1,1]^T as 'both nodes moving equally'"
+        ],
+        "negative": [
+          "Says the matrix 'does not work' or 'is defective'",
+          "Thinks part (a) has no solution (confusing no unique solution with no solution)",
+          "Cannot explain physically why part (b) has no solution",
+          "Treats the singularity as a mathematical curiosity without physical interpretation",
+          "Says 'we just need to add boundary conditions to fix the matrix' without explaining why it is singular"
+        ]
+      }
+    },
+    "DOF_A": {
+      "problem_id": "DOF_A",
+      "node": "local_global_dofs",
+      "targets_los": ["LO1", "LO2"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "Consider a system of three springs connected in series:\n\n- Spring 1 (k1 = 100 N/m) connects global node 1 to global node 2\n- Spring 2 (k2 = 150 N/m) connects global node 2 to global node 3\n- Spring 3 (k3 = 200 N/m) connects global node 3 to global node 4\n\n(a) How many global degrees of freedom does this system have?\n(b) For each spring element, write the local-to-global DOF mapping.\n(c) Write the element stiffness matrix for each spring in terms of its local DOFs, then identify which global DOF positions each matrix will contribute to.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Count global DOFs",
+          "content": "4 nodes -> 4 global DOFs (u1, u2, u3, u4)",
+          "physical_reasoning": "Each node can move independently in the horizontal direction. One node, one DOF for this 1D problem."
+        },
+        {
+          "step": 2,
+          "description": "Build connectivity maps",
+          "content": "Spring 1: [1, 2]. Spring 2: [2, 3]. Spring 3: [3, 4].",
+          "physical_reasoning": "Every element lives in its own little world — it only knows about its two local nodes. The connectivity map is the translator. Spring 1's local node 2 and Spring 2's local node 1 are the same physical point — global node 2. That shared node is where the elements communicate."
+        },
+        {
+          "step": 3,
+          "description": "Write element matrices and identify global positions",
+          "content": "Spring 1: k1[[1,-1],[-1,1]] -> rows/columns 1,2. Spring 2: k2[[1,-1],[-1,1]] -> rows/columns 2,3. Spring 3: k3[[1,-1],[-1,1]] -> rows/columns 3,4.",
+          "physical_reasoning": "Every element stiffness matrix looks identical in local coordinates. The element does not care where it sits in the global system. The connectivity map places it in the right location within the global matrix."
+        }
+      ],
+      "final_answer": "(a) 4 DOFs. (b) Spring 1: [1,2], Spring 2: [2,3], Spring 3: [3,4]. (c) Each element has k_i[[1,-1],[-1,1]] contributing to the global positions indicated by its connectivity.",
+      "expert_narration": "Now we have a system with more than one element, and this is where the direct stiffness method really begins. Let me think about this carefully.\n\nI have four nodes, so four global DOFs. That means my global stiffness matrix will be 4x4. But each element only knows about two nodes — its own local node 1 and local node 2. The element stiffness matrix is still 2x2. So how do I get from three 2x2 matrices to one 4x4 matrix? That is the question.\n\nThe answer is the connectivity map. Let me build it for each element. Spring 1 connects global nodes 1 and 2. So its local node 1 is global node 1, and its local node 2 is global node 2. I write this as [1, 2]. Spring 2 connects global nodes 2 and 3, so its map is [2, 3]. Spring 3: [3, 4].\n\nNow here is the key insight — look at global node 2. It appears in Spring 1's connectivity as local node 2, and in Spring 2's connectivity as local node 1. This means when I assemble the global matrix, both elements will contribute stiffness to the row and column corresponding to global DOF 2. This is not a coincidence — it is the physical reality that node 2 feels forces from both springs attached to it. The connectivity map is how we encode that physical connection mathematically.\n\nLet me write out what each element contributes. Spring 1's matrix k1[[1,-1],[-1,1]] goes into global positions (1,2) x (1,2). Spring 2's matrix k2[[1,-1],[-1,1]] goes into global positions (2,3) x (2,3). See how Spring 1 puts something in global position (2,2), and Spring 2 also puts something in global position (2,2)? When we assemble, those contributions will add up. That is the next topic. But right now, make sure you understand the mapping — it is the bridge between element and system.",
+      "scaffolded_versions": {
+        "level_3": "There are 4 nodes, so 4 global DOFs. I will give you Spring 1's connectivity: local node 1 -> global node 1, local node 2 -> global node 2, so the map is [1, 2]. Now write the connectivity maps for Springs 2 and 3. Then tell me: which global rows and columns does each element's stiffness matrix contribute to?",
+        "level_2": "Start by counting the global DOFs. Then for each spring, ask yourself: which two global nodes does this spring connect? That gives you the connectivity map directly.",
+        "level_1": "Work through all three parts. For each element, build the local-to-global mapping and identify where its stiffness matrix lands in the global system."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains that each element only knows its local DOFs and the connectivity map translates to the global system",
+          "Identifies shared nodes as the mechanism of inter-element communication",
+          "Connects the connectivity map to physical attachment ('node 2 feels forces from both springs')",
+          "Explains why the element matrix form is always the same regardless of global position"
+        ],
+        "negative": [
+          "Writes connectivity maps correctly but cannot explain what they mean physically",
+          "Thinks the element stiffness matrix changes depending on its global position",
+          "Confuses 'local node 1 is always the left node' with the actual convention",
+          "Treats connectivity as a purely bookkeeping exercise without physical significance"
+        ]
+      }
+    },
+    "DOF_B": {
+      "problem_id": "DOF_B",
+      "node": "local_global_dofs",
+      "targets_los": ["LO3"],
+      "targets_misconceptions": ["M1", "M2"],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "Take the same three-spring system from Problem A. Now I relabel the global nodes. What was node 1 is now node 4, what was node 2 is now node 3, what was node 3 is now node 1, and what was node 4 is now node 2. The physical system has not changed — I just changed the numbers on the labels.\n\n(a) Write the new connectivity maps for each spring.\n(b) Does any element stiffness matrix change? Why or why not?\n(c) Will the assembled global stiffness matrix be the same as before? Why or why not?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "New connectivity maps",
+          "content": "Spring 1: [4, 3]. Spring 2: [3, 1]. Spring 3: [1, 2].",
+          "physical_reasoning": "The springs connect the same physical points. Only the labels changed."
+        },
+        {
+          "step": 2,
+          "description": "Element stiffness matrices",
+          "content": "No element stiffness matrix changes. Each is still k_i[[1,-1],[-1,1]] in local coordinates.",
+          "physical_reasoning": "The element stiffness matrix depends on the spring stiffness k — a physical property — not on what global number we assign to its nodes."
+        },
+        {
+          "step": 3,
+          "description": "Global stiffness matrix comparison",
+          "content": "The global stiffness matrix will be numerically different. The entries get rearranged.",
+          "physical_reasoning": "The global matrix is an accounting structure. Same physics, different bookkeeping. The physical solution at each physical point is the same regardless of numbering."
+        }
+      ],
+      "final_answer": "(a) Spring 1: [4,3], Spring 2: [3,1], Spring 3: [1,2]. (b) No — element matrices depend on physical properties, not global numbering. (c) Different numerically but represents the same physical system.",
+      "expert_narration": "This is a thought experiment that really clarifies what the connectivity map is doing. I have not touched the physical system — same springs, same connections, same stiffnesses. I just peeled off the node number stickers and put on new ones.\n\nSo what changes? The connectivity maps change — of course, because they reference global node numbers. Spring 1 used to map to [1, 2], now it maps to [4, 3]. And notice something that might feel uncomfortable: local node 1 of Spring 1 now maps to global node 4, which is a higher number than global node 3. That is fine. There is no rule that says local node 1 must be the lower-numbered global node. Local numbering is the element's private business. Global numbering is the system's choice. They are independent.\n\nThe element stiffness matrices? Completely unchanged. And this should make intuitive sense — the spring does not know what global number its nodes have. It only knows its stiffness and its two local endpoints. The element matrix is a property of the element's physics, not of the bookkeeping system.\n\nThe global matrix does change — the numbers move to different positions. But here is the deep point: if I also relabel my force vector and displacement vector consistently, I get exactly the same physical solution. The relabeling is just a permutation. This tells you something fundamental: the global stiffness matrix is not unique for a given physical system. It depends on your numbering convention. What is unique is the physics — the forces and displacements at each physical point.",
+      "scaffolded_versions": {
+        "level_3": "I will help with the first one. Spring 1 connects the leftmost pair of nodes. Those nodes used to be called 1 and 2. Now they are called 4 and 3. So Spring 1's new connectivity is [4, 3]. Now do Springs 2 and 3. Then think: did anything about the springs themselves change?",
+        "level_2": "Map the old node numbers to new ones first. Then rewrite each connectivity. For part (b), ask yourself: what does the element stiffness matrix depend on? Does any of that change when I relabel?",
+        "level_1": "Work through all three parts. Think carefully about what changes and what does not when we relabel, and why."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "States that element matrices depend on physical properties (k), not on global numbering",
+          "Explains that the global matrix changes because contributions land in different positions",
+          "Recognizes that local-to-global mapping is an arbitrary assignment, not a physical law",
+          "Comfortable with local node 1 mapping to a higher-numbered global node"
+        ],
+        "negative": [
+          "Thinks element matrices should change because the connectivity changed",
+          "Insists local node 1 must map to the lower global node number",
+          "Says the global matrix is 'the same' without recognizing the permutation",
+          "Cannot distinguish between the physical system and the numerical representation"
+        ]
+      }
+    },
+    "DOF_C": {
+      "problem_id": "DOF_C",
+      "node": "local_global_dofs",
+      "targets_los": ["LO4"],
+      "targets_misconceptions": ["M3", "M4"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY"],
+      "statement": "Consider a system where node 2 is connected to three other nodes:\n\n- Spring A (ka = 100 N/m) connects node 1 to node 2\n- Spring B (kb = 150 N/m) connects node 2 to node 3\n- Spring C (kc = 200 N/m) connects node 2 to node 4\n\n(a) How many global DOFs? What is the size of the global stiffness matrix?\n(b) Write the connectivity map for each element.\n(c) Global DOF 2 (the displacement of node 2) appears in multiple element stiffness matrices. Which ones? What does this mean physically?\n(d) Without assembling the full matrix, what value will you find at position K22 of the global stiffness matrix? Explain your reasoning physically.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Count DOFs",
+          "content": "4 nodes -> 4 global DOFs -> 4x4 global stiffness matrix",
+          "physical_reasoning": "One DOF per node for this 1D system. The topology does not change the DOF count."
+        },
+        {
+          "step": 2,
+          "description": "Connectivity maps",
+          "content": "Spring A: [1, 2]. Spring B: [2, 3]. Spring C: [2, 4].",
+          "physical_reasoning": "Each spring still connects exactly two nodes. The branching does not change how connectivity works."
+        },
+        {
+          "step": 3,
+          "description": "Which elements contribute to DOF 2",
+          "content": "All three elements.",
+          "physical_reasoning": "Node 2 is physically connected to all three springs. When node 2 displaces, it deforms all three springs simultaneously."
+        },
+        {
+          "step": 4,
+          "description": "Value of K22",
+          "content": "K22 = ka + kb + kc = 100 + 150 + 200 = 450 N/m",
+          "physical_reasoning": "K22 is the force required at node 2 to produce a unit displacement while all other nodes are held fixed. All three springs resist. The total restoring force is their sum."
+        }
+      ],
+      "final_answer": "(a) 4 DOFs, 4x4 matrix. (b) A:[1,2], B:[2,3], C:[2,4]. (c) All three — node 2 is connected to all three springs. (d) K22 = 450 N/m.",
+      "expert_narration": "Up until now we have had springs in a nice line. But the direct stiffness method does not care about topology. Let me work through this branching case.\n\nFour nodes, four DOFs, 4x4 matrix — that part is the same. The connectivity maps are straightforward too. What is new and interesting is what happens at node 2.\n\nNode 2 is a junction — three springs meet there. In the series case, each interior node connected to two springs. Now node 2 connects to three. What does this change? Let me think about it from the element perspective. Each spring still has its own 2x2 element matrix in local coordinates. Spring A does not know about Springs B and C. It just knows its two nodes.\n\nBut when I build the connectivity maps, I see that all three elements list global node 2. Spring A says 'my local node 2 is global node 2.' Spring B says 'my local node 1 is global node 2.' Spring C also says 'my local node 1 is global node 2.' So when I go to assemble, all three will deposit stiffness contributions into row 2 and column 2 of the global matrix.\n\nNow, what ends up at K22? Each element contributes its diagonal term corresponding to node 2. For Spring A, that is ka (from the local (2,2) position). For Spring B, that is kb (from the local (1,1) position). For Spring C, that is kc (from the local (1,1) position). So K22 = ka + kb + kc = 450.\n\nBut do not just take the math's word for it — think physically. If I push node 2 one unit to the right while holding everything else fixed, I am fighting all three springs at once. Each one pushes back proportionally to its stiffness. The total resistance is the sum. That is what K22 means. It is the total stiffness 'seen' by node 2. And this generalizes: any diagonal term Kii is the sum of stiffnesses of all elements connected to node i.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Start with the connectivity maps. Then ask yourself: which elements list node 2 in their connectivity? For each one, what local position (1 or 2) corresponds to global node 2? Each one contributes a term to K22 — which term from the local matrix?",
+        "level_1": "Work through all four parts. The key insight is at node 2 — think about what happens physically when multiple springs share a node."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains that all elements connected to a node contribute to that node's diagonal stiffness",
+          "Uses the unit displacement thought experiment to derive K22",
+          "Recognizes that branching topology does not change how connectivity or assembly works",
+          "Explains physically why element contributions add at shared nodes (forces superpose)"
+        ],
+        "negative": [
+          "Cannot determine K22 without fully assembling the matrix",
+          "Thinks the branching topology requires a different approach",
+          "Does not realize that all three elements contribute to K22",
+          "Says 'the stiffnesses add up' without explaining why physically"
+        ]
+      }
+    },
+    "ASM_A": {
+      "problem_id": "ASM_A",
+      "node": "assembly",
+      "targets_los": ["LO1", "LO2"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "Using the same three-spring series system:\n\n- Spring 1 (k1 = 100 N/m) connects nodes 1-2, connectivity [1, 2]\n- Spring 2 (k2 = 150 N/m) connects nodes 2-3, connectivity [2, 3]\n- Spring 3 (k3 = 200 N/m) connects nodes 3-4, connectivity [3, 4]\n\nAssemble the 4x4 global stiffness matrix. For each element, use its connectivity map to place its stiffness contributions directly into the global matrix. Show your work element by element.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Initialize and place Spring 1",
+          "content": "Start with 4x4 zero matrix. Spring 1 connectivity [1,2]: +100 at (1,1), -100 at (1,2), -100 at (2,1), +100 at (2,2). Everything else zero.",
+          "physical_reasoning": "Spring 1 only connects nodes 1 and 2. It has no effect on nodes 3 or 4. Its contributions land only in rows and columns corresponding to DOFs 1 and 2."
+        },
+        {
+          "step": 2,
+          "description": "Place Spring 2",
+          "content": "Spring 2 connectivity [2,3]: +150 at (2,2), -150 at (2,3), -150 at (3,2), +150 at (3,3). Global (2,2) becomes 100 + 150 = 250.",
+          "physical_reasoning": "Global position (2,2) gets contributions from both Spring 1 and Spring 2. This is superposition. Node 2 is physically connected to both springs. If I displace node 2, both springs resist. The total stiffness is the sum."
+        },
+        {
+          "step": 3,
+          "description": "Place Spring 3",
+          "content": "Spring 3 connectivity [3,4]: +200 at (3,3), -200 at (3,4), -200 at (4,3), +200 at (4,4). Global (3,3) becomes 150 + 200 = 350.",
+          "physical_reasoning": "Node 3 is connected to both Spring 2 and Spring 3, so position (3,3) accumulates stiffness from both."
+        },
+        {
+          "step": 4,
+          "description": "Final assembled matrix and verification",
+          "content": "K_global = [[100, -100, 0, 0], [-100, 250, -150, 0], [0, -150, 350, -200], [0, 0, -200, 200]]",
+          "physical_reasoning": "Every row sums to zero — equilibrium of the unsupported system. The matrix is symmetric — Newton's third law. The matrix is banded — zeros where nodes are not directly connected. And singular — no boundary conditions applied yet."
+        }
+      ],
+      "final_answer": "K = [[100, -100, 0, 0], [-100, 250, -150, 0], [0, -150, 350, -200], [0, 0, -200, 200]]",
+      "expert_narration": "We have our three element stiffness matrices from before, and we have our connectivity maps. Now we need to combine them into a single global system. The idea is simple but powerful: I take each element's contributions and place them directly into the correct positions of the global matrix using the connectivity map as my guide.\n\nLet me start with a 4x4 matrix of zeros — four nodes, four DOFs. Now I go element by element.\n\nSpring 1 has connectivity [1, 2]. That tells me everything I need: its local row 1 maps to global row 1, local row 2 maps to global row 2, and the same for columns. So I take k1 = 100 and place: +100 at (1,1), -100 at (1,2), -100 at (2,1), +100 at (2,2). The rest stays zero. If I stop and think about this physically — I have only placed Spring 1 so far. Nodes 3 and 4 are unconnected, floating in space. The matrix reflects that: those rows and columns are empty.\n\nNow Spring 2, connectivity [2, 3]. Its local node 1 is global node 2, local node 2 is global node 3. So k2 = 150 goes to: +150 at (2,2), -150 at (2,3), -150 at (3,2), +150 at (3,3). And here is the moment that matters — position (2,2) already had 100 from Spring 1. I add 150 to it, getting 250. Why add? Because node 2 is physically attached to both springs. If I displace node 2 while holding everything else fixed, both Spring 1 and Spring 2 resist that displacement. Spring 1 pushes back with force k1, Spring 2 pushes back with force k2. The total restoring force is k1 + k2 = 250. That is superposition — and it is the physical heart of the assembly process.\n\nSpring 3, connectivity [3, 4]. Same procedure: k3 = 200 placed at positions (3,3), (3,4), (4,3), (4,4). Position (3,3) accumulates: 150 + 200 = 350. Node 3 is connected to two springs.\n\nLet me look at what we built. The final matrix is [[100, -100, 0, 0], [-100, 250, -150, 0], [0, -150, 350, -200], [0, 0, -200, 200]]. I always do a few sanity checks. Every row sums to zero — good, the system is unsupported so no net force. The matrix is symmetric — that is Newton's third law built in. And it is banded — the zeros at positions like (1,3) tell me nodes 1 and 3 are not directly connected. The structure of the matrix mirrors the physical connectivity of the system. That is not a coincidence — it is the entire point of the direct stiffness method.",
+      "scaffolded_versions": {
+        "level_3": "I will start Spring 1 for you. Its connectivity is [1, 2], so k1 = 100 goes to positions (1,1), (1,2), (2,1), (2,2) with the usual signs. The matrix so far is [[100, -100, 0, 0], [-100, 100, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]. Now place Spring 2 with connectivity [2, 3]. What happens at position (2,2)?",
+        "level_2": "Start with a 4x4 zero matrix. Go element by element. For each spring, use its connectivity map to determine which global positions receive its stiffness entries. Pay close attention to what happens at shared nodes.",
+        "level_1": "Assemble the global stiffness matrix. Show your work element by element and explain physically why entries accumulate at shared DOFs."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains that entries add at shared DOFs because the node feels forces from all connected springs (superposition)",
+          "Connects the placement rule to the connectivity map explicitly",
+          "Verifies the result by checking row/column sums equal zero",
+          "Notes the banded structure and connects it to physical connectivity",
+          "Explains the symmetry physically (Newton's third law)"
+        ],
+        "negative": [
+          "Places entries correctly but cannot explain why they add at shared DOFs",
+          "Says 'the entries overlap so we add them' without the superposition argument",
+          "Cannot predict which positions will be nonzero before computing",
+          "Treats assembly as a mechanical procedure without physical interpretation"
+        ]
+      }
+    },
+    "ASM_B": {
+      "problem_id": "ASM_B",
+      "node": "assembly",
+      "targets_los": ["LO3", "LO4"],
+      "targets_misconceptions": [],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "Consider the assembled global stiffness matrix from Problem A:\n\nK = [[100, -100, 0, 0], [-100, 250, -150, 0], [0, -150, 350, -200], [0, 0, -200, 200]]\n\nWithout referring to the assembly procedure, answer these questions using only physical reasoning:\n\n(a) Why is K13 = 0? What would it mean physically if it were nonzero?\n(b) Why is K22 = 250 while K11 = 100? What does this tell you about nodes 2 and 1?\n(c) The matrix is symmetric. Explain why this must be true physically.\n(d) Every row sums to zero. What physical principle does this reflect, and when would this no longer be true?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Why K13 = 0",
+          "content": "Nodes 1 and 3 are not directly connected by any spring.",
+          "physical_reasoning": "K13 represents the force at node 1 caused by a unit displacement of node 3 while all other nodes are held fixed. If I move node 3 and hold node 2 fixed, the force does not propagate to node 1 because node 2 acts as a shield. If K13 were nonzero, it would mean there is a direct physical mechanism transmitting force from node 3 to node 1."
+        },
+        {
+          "step": 2,
+          "description": "Why K22 > K11",
+          "content": "K22 = 250 = k1 + k2. K11 = 100 = k1.",
+          "physical_reasoning": "The diagonal entry Kii represents the total stiffness seen by node i. Node 2 is interior, connected to two springs. Node 1 is an end node connected to only one. The diagonal tells you how many elements are connected to each node and how stiff they are."
+        },
+        {
+          "step": 3,
+          "description": "Symmetry",
+          "content": "Kij = Kji for all i, j.",
+          "physical_reasoning": "This is Newton's third law in matrix form — reciprocity. The force at node i due to displacing node j equals the force at node j due to displacing node i. For any system where internal forces derive from a potential energy, the stiffness matrix must be symmetric."
+        },
+        {
+          "step": 4,
+          "description": "Row sums equal zero",
+          "content": "Each row sums to zero.",
+          "physical_reasoning": "A rigid body translation u = [1,1,1,1]^T produces zero forces. No spring deforms if every node moves equally. The row sums would no longer be zero after applying displacement boundary conditions, because fixing a node removes the rigid body mode."
+        }
+      ],
+      "final_answer": "(a) No direct connection between nodes 1 and 3. (b) Node 2 connects to two springs, node 1 to one. (c) Newton's third law / reciprocity. (d) Rigid body equilibrium; changes after BCs.",
+      "expert_narration": "I want you to look at the assembled matrix and read it like a story about the physical system. Every entry has a meaning.\n\nStart with the zeros. K13 = 0 and K14 = 0 and K24 = 0. These tell me which nodes are not directly connected. If I displace node 3 while holding everything else fixed, node 1 feels nothing — there is no spring between them. Node 2 absorbs the effect because it is held fixed. The zero is not emptiness — it is information: no direct physical coupling.\n\nNow the diagonal. K11 = 100 but K22 = 250. Node 1 sits at the end of the chain, connected to one spring. Node 2 is interior, connected to two springs. The diagonal entry is the total stiffness each node sees. It is like asking: if I nail everything else to the wall and push this node, how hard does the system push back? Node 2 pushes back harder because two springs resist.\n\nSymmetry. K12 = K21 = -100. This has to be true because of Newton's third law. If displacing node 2 creates a force on node 1, then displacing node 1 must create an equal force on node 2. This reciprocity is not just a nice property — it is a consequence of the physics. Any system with conservative internal forces will have a symmetric stiffness matrix. When you build more complex elements later, if your matrix comes out asymmetric, you know you have an error.\n\nThe row sums. Every row adds up to zero. This means if I set u = [1, 1, 1, 1]^T — all nodes move equally — the resulting force vector is [0, 0, 0, 0]^T. A rigid translation produces no internal forces. Of course — no spring stretches if every node moves the same amount. This is the matrix telling you the system has a rigid body mode. After we apply boundary conditions, this will change — the fixed nodes break the rigid body freedom, the row sums become nonzero, and the matrix becomes invertible.",
+      "scaffolded_versions": {
+        "level_3": "For part (a), think about what Kij means physically: it is the force at node i when you displace node j by one unit while holding all other nodes fixed. Now imagine displacing node 3 while holding nodes 1, 2, and 4 fixed. Does node 1 feel anything? Why or why not?",
+        "level_2": "For each part, think about the physical meaning of the matrix entries. What does a diagonal entry represent? What does an off-diagonal entry represent? What does a zero entry tell you?",
+        "level_1": "Answer all four parts using physical reasoning. I want to hear about forces, displacements, and equilibrium — not just matrix properties."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains K13 = 0 through lack of direct physical connection",
+          "Interprets diagonal entries as total stiffness seen by each node",
+          "Connects symmetry to Newton's third law or reciprocity",
+          "Explains row sums through rigid body translation argument",
+          "Can predict what changes after applying boundary conditions"
+        ],
+        "negative": [
+          "Says K13 = 0 'because no spring connects 1 and 3' without the force transmission argument",
+          "Cannot explain why K22 is larger than K11 beyond 'more springs connect to it'",
+          "Says 'the matrix is symmetric because stiffness matrices are always symmetric' (circular)",
+          "Explains row sums as 'the math works out' without the rigid body argument"
+        ]
+      }
+    },
+    "ASM_C": {
+      "problem_id": "ASM_C",
+      "node": "assembly",
+      "targets_los": ["LO1", "LO2", "LO3", "LO4"],
+      "targets_misconceptions": ["M1", "M2"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY"],
+      "statement": "Consider a four-node system with a different topology:\n\n- Spring A (ka = 100 N/m): nodes 1-2, connectivity [1, 2]\n- Spring B (kb = 100 N/m): nodes 2-3, connectivity [2, 3]\n- Spring C (kc = 100 N/m): nodes 3-4, connectivity [3, 4]\n- Spring D (kd = 100 N/m): nodes 1-4, connectivity [1, 4]\n\nThis forms a closed loop.\n\n(a) Assemble the 4x4 global stiffness matrix.\n(b) Is K14 zero in this system? Compare to the series system and explain the physical difference.\n(c) What are the diagonal values? What pattern do you see and why?\n(d) Does the assembled matrix still have rows that sum to zero? Should it?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Assembly",
+          "content": "K_global = [[200, -100, 0, -100], [-100, 200, -100, 0], [0, -100, 200, -100], [-100, 0, -100, 200]]",
+          "physical_reasoning": "Same procedure, one element at a time. Spring D creates entries at positions (1,4) and (4,1) that were zero in the series system."
+        },
+        {
+          "step": 2,
+          "description": "K14 is nonzero",
+          "content": "K14 = -100, not zero.",
+          "physical_reasoning": "Spring D directly connects nodes 1 and 4. If I displace node 4, Spring D immediately transmits a force to node 1. The nonzero K14 is the mathematical signature of a direct physical connection."
+        },
+        {
+          "step": 3,
+          "description": "Diagonal values",
+          "content": "K11 = K22 = K33 = K44 = 200.",
+          "physical_reasoning": "Every node is connected to exactly two springs, each with stiffness 100. The loop topology makes every node equivalent — each has exactly two neighbors."
+        },
+        {
+          "step": 4,
+          "description": "Row sums",
+          "content": "Every row sums to zero.",
+          "physical_reasoning": "No boundary conditions applied. The system can translate rigidly regardless of topology. Whether chain or loop, an unsupported structure has zero row sums."
+        }
+      ],
+      "final_answer": "(a) K = [[200,-100,0,-100],[-100,200,-100,0],[0,-100,200,-100],[-100,0,-100,200]]. (b) K14 = -100, nonzero due to Spring D. (c) All diagonals = 200, each node connects to two springs. (d) Yes, rows sum to zero — system is unsupported.",
+      "expert_narration": "Here is something interesting — a loop. Up until now we had chains where each node had at most two neighbors and the ends had one. A loop changes the topology: every node has exactly two neighbors, and there are no ends.\n\nThe assembly procedure does not care about topology. I go element by element, use connectivity to place entries. Spring A goes to (1,2) positions, Spring B to (2,3), Spring C to (3,4), and Spring D — here is the new one — to (1,4). Same rule, different positions.\n\nNow look at the result. K14 = -100. In our series system this was zero. What changed? Spring D. There is now a direct physical link between nodes 1 and 4. If I displace node 4, node 1 immediately feels it through Spring D. The matrix captures this exactly. This is a powerful idea: the sparsity pattern of the stiffness matrix is a map of the physical connectivity. If two nodes are directly connected by an element, the corresponding off-diagonal entry is nonzero. If they are not, it is zero.\n\nThe diagonals are all 200. Every node connects to exactly two springs of stiffness 100. The loop has a symmetry that the chain did not — every node is structurally equivalent. The matrix reflects this with uniform diagonal values.\n\nAnd rows still sum to zero. This must be true because we have not fixed anything. A rigid translation moves all four nodes equally, no spring deforms, no forces arise. This property depends on the support conditions, not on the topology. A chain, a loop, a branching tree — any unsupported structure has row sums of zero. That changes the moment we fix a node.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Assemble the first three springs the same way you did in the series problem. Then add Spring D with connectivity [1, 4]. What new positions does it fill? After assembly, compare K14 to what it was in the series case and explain the difference physically.",
+        "level_1": "Assemble the full matrix and answer all four parts. The loop topology changes some things but not others — figure out what and why."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Correctly handles the loop topology without procedural confusion",
+          "Explains K14 nonzero through the direct physical connection of Spring D",
+          "Connects equal diagonals to the structural symmetry of the loop",
+          "Affirms row sums are zero because system is unsupported regardless of topology",
+          "Recognizes the sparsity pattern maps physical connectivity"
+        ],
+        "negative": [
+          "Cannot handle Spring D because it 'wraps around'",
+          "Says K14 is nonzero 'because we added another spring' without explaining force transmission",
+          "Cannot explain why all diagonals are equal",
+          "Thinks the loop topology should change the row sum property"
+        ]
+      }
+    },
+    "BC_A": {
+      "problem_id": "BC_A",
+      "node": "boundary_conditions",
+      "targets_los": ["LO1", "LO2"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "Take the assembled global stiffness matrix from the three-spring series system:\n\nK = [[100, -100, 0, 0], [-100, 250, -150, 0], [0, -150, 350, -200], [0, 0, -200, 200]]\n\nThe boundary conditions are: node 1 is fixed (u1 = 0) and node 4 is fixed (u4 = 0). An external force of F2 = 50 N is applied at node 2, and F3 = 0 N at node 3.\n\n(a) Why can't we solve Ku = F directly with the full 4x4 system?\n(b) Apply the displacement boundary conditions using the elimination approach to obtain the reduced system.\n(c) What is the physical meaning of the reduced system — what does it describe?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Why we can't solve the full system",
+          "content": "The 4x4 matrix K is singular (det = 0).",
+          "physical_reasoning": "The full system describes a free structure. If I apply forces, the whole system could just accelerate. There is no unique displacement solution because there is no spatial reference. Boundary conditions remove the rigid body freedom."
+        },
+        {
+          "step": 2,
+          "description": "Apply elimination",
+          "content": "Eliminate row 1, column 1 (u1 = 0) and row 4, column 4 (u4 = 0). Reduced: [[250, -150], [-150, 350]] [u2, u3]^T = [50, 0]^T",
+          "physical_reasoning": "When I fix node 1, its displacement is known (zero), so it is no longer an unknown. I remove it from the system of equations. Same for node 4. What remains is a 2x2 system with the two free node displacements as unknowns."
+        },
+        {
+          "step": 3,
+          "description": "Physical meaning of the reduced system",
+          "content": "Equilibrium of the free nodes (2 and 3) given immovable supports at nodes 1 and 4.",
+          "physical_reasoning": "I have attached both ends to walls. The reduced matrix describes how the interior responds to applied loads. The structure is now properly supported, the matrix is invertible, and there is exactly one equilibrium configuration."
+        }
+      ],
+      "final_answer": "(a) Matrix is singular — no spatial reference. (b) [[250,-150],[-150,350]][u2,u3]^T = [50,0]^T. (c) Equilibrium of free nodes with fixed supports.",
+      "expert_narration": "We have this beautiful assembled matrix but we cannot use it yet. Try it: Ku = F. The matrix is singular — no inverse exists. Is something wrong? No. This is the matrix correctly telling us that the system is floating in space.\n\nThink about it physically. I have three springs in a chain, connected end to end, but not attached to anything. If I push on node 2, the whole chain just slides. There is no unique equilibrium position. The mathematics reflects this perfectly: the null space of K is [1, 1, 1, 1]^T, the rigid body mode.\n\nSo I need to give the system a reference. I fix node 1 to a wall: u1 = 0. And I fix node 4 to another wall: u4 = 0. Physically, I have anchored both ends. Now the chain is stretched between two fixed points and any load will produce a unique deformation.\n\nMathematically, since u1 and u4 are now known (zero), they are no longer unknowns. I eliminate them from the system. I remove row 1 and column 1 and row 4 and column 4. What remains is a 2x2 system: [[250, -150], [-150, 350]] [u2, u3]^T = [50, 0]^T.\n\nLet me make sure I understand what this reduced system means. The left-hand side describes the internal stiffness of the two free nodes. The 250 is the stiffness node 2 feels — connected to Spring 1 (whose other end is now fixed to a wall) and Spring 2. The right-hand side is the external load: 50 N at node 2, nothing at node 3. This system is invertible. It has a unique solution. The boundary conditions did not fix a broken matrix — they removed a physical freedom that made the solution non-unique.",
+      "scaffolded_versions": {
+        "level_3": "For part (a), try computing det(K) or try solving Ku = F directly. What goes wrong? Think about what the system looks like physically — nothing is fixed. For part (b), if u1 = 0 is known, we no longer need the equation for node 1 (row 1) and we no longer need u1 as a variable (column 1). Remove both. Do the same for u4.",
+        "level_2": "Start with part (a) by thinking about what the system looks like before any supports. Then for part (b), the elimination approach means removing the rows and columns corresponding to known displacements.",
+        "level_1": "Work through all three parts. For each step, explain the physical reasoning — not just what you do mathematically, but why it makes sense physically."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains singularity through rigid body modes and lack of spatial reference",
+          "Describes elimination as removing known quantities from the system of unknowns",
+          "Interprets the reduced system as equilibrium of free nodes with anchored supports",
+          "Explains that BCs give the structure a physical reference, not fix a mathematical error"
+        ],
+        "negative": [
+          "Says 'we delete rows and columns to make it invertible' without the physical reasoning",
+          "Treats BCs as a mathematical trick rather than a physical constraint",
+          "Cannot explain why the full matrix should be singular",
+          "Does not connect the reduced matrix entries to physical stiffness of the supported structure"
+        ]
+      }
+    },
+    "BC_B": {
+      "problem_id": "BC_B",
+      "node": "boundary_conditions",
+      "targets_los": ["LO3"],
+      "targets_misconceptions": ["M2", "M5"],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "Using the same three-spring series system with the assembled matrix K, consider two different support scenarios:\n\nScenario 1: Only node 1 is fixed (u1 = 0). Forces F2 = 0, F3 = 0, F4 = 80 N.\n\nScenario 2: Both node 1 and node 4 are fixed (u1 = 0, u4 = 0). Forces F2 = 50 N, F3 = 0.\n\n(a) Set up the reduced system for each scenario. How many unknowns does each have?\n(b) In Scenario 1, the 80 N at node 4 is a force boundary condition. In Scenario 2, u4 = 0 is a displacement boundary condition. Where does each one enter the system of equations?\n(c) Could you solve the system if the only boundary conditions were F2 = 50 N and F3 = 0 with no displacement BCs at all? Why or why not?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Set up both scenarios",
+          "content": "Scenario 1: eliminate row/col 1. 3x3 system: [[250,-150,0],[-150,350,-200],[0,-200,200]][u2,u3,u4]^T = [0,0,80]^T. Three unknowns. Scenario 2: eliminate rows/cols 1 and 4. 2x2 system: [[250,-150],[-150,350]][u2,u3]^T = [50,0]^T. Two unknowns.",
+          "physical_reasoning": "Scenario 1: only left end is fixed. Three nodes can move. Scenario 2: both ends fixed. Only two interior nodes are free. Each displacement BC removes one unknown."
+        },
+        {
+          "step": 2,
+          "description": "Where each BC type enters",
+          "content": "Force BC (80 N) appears on right-hand side. Displacement BC (u4 = 0) removes row and column from the matrix.",
+          "physical_reasoning": "A force BC tells the system what load is applied at a free node — the node can still move. A displacement BC tells the system where a node is — the node is no longer free. Force adds information to the right side. Displacement removes a degree of freedom from the left side."
+        },
+        {
+          "step": 3,
+          "description": "Force BCs alone",
+          "content": "No. The full 4x4 matrix remains singular.",
+          "physical_reasoning": "Force BCs do not anchor the structure in space. Without at least one displacement BC, the system can translate rigidly. You need displacement BCs to remove the rigid body mode."
+        }
+      ],
+      "final_answer": "(a) Scenario 1: 3x3, three unknowns. Scenario 2: 2x2, two unknowns. (b) Force BC enters right-hand side. Displacement BC removes unknowns from left-hand side. (c) No — force BCs alone cannot remove rigid body modes.",
+      "expert_narration": "Let me set up both scenarios side by side so we can see the difference clearly.\n\nScenario 1: only node 1 is fixed. I eliminate row 1 and column 1, and I have a 3x3 system. Three unknowns: u2, u3, u4. The 80 N force at node 4 sits on the right-hand side. It enters the equation for node 4, which says: the internal forces at node 4 must balance the 80 N external push. Node 4 is free to move — its displacement is an unknown.\n\nScenario 2: both ends are fixed. I eliminate rows and columns for nodes 1 and 4. Now I have a 2x2 system. The 50 N at node 2 goes on the right-hand side. But the key difference is that node 4 is gone from the unknowns entirely. Fixing u4 = 0 removed an entire degree of freedom.\n\nThis is the fundamental distinction. A force boundary condition says 'here is the load at this node, now figure out where the node goes.' The force is information about the cause, and the displacement is the unknown effect. A displacement boundary condition says 'here is where this node is, end of discussion.' The displacement is known, and whatever force the support must exert becomes something we recover later as a reaction.\n\nNow part (c) — what if we only have force BCs and no displacement BCs? We would have the full 4x4 singular matrix. No unique solution. The structure is floating in space. Force BCs tell the system what to resist, but they cannot tell it where to be. You always need at least one displacement BC to anchor the structure and break the rigid body mode.",
+      "scaffolded_versions": {
+        "level_3": "For Scenario 1, only u1 = 0 is prescribed. So you only eliminate row and column 1. That leaves a 3x3 system. Where does the 80 N go? For Scenario 2, both u1 and u4 are prescribed. How many rows and columns do you eliminate now?",
+        "level_2": "Set up both reduced systems and compare them. One has a force BC at node 4, the other has a displacement BC. Think about how each type affects the system of equations differently.",
+        "level_1": "Work through all three parts. Focus on the fundamental difference between prescribing a force and prescribing a displacement."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Explains that force BCs enter the right-hand side while displacement BCs remove unknowns from the left-hand side",
+          "States that displacement BCs are required to anchor the structure and remove rigid body modes",
+          "Connects to the singularity concept from Node 1",
+          "Explains what each BC type physically represents"
+        ],
+        "negative": [
+          "Confuses which type modifies the matrix versus the force vector",
+          "Says 'we need BCs to make it invertible' without distinguishing types",
+          "Thinks force BCs alone could make the system solvable",
+          "Treats the distinction as a mathematical technicality"
+        ]
+      }
+    },
+    "BC_C": {
+      "problem_id": "BC_C",
+      "node": "boundary_conditions",
+      "targets_los": ["LO1", "LO2", "LO4"],
+      "targets_misconceptions": ["M3", "M4"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY"],
+      "statement": "Using the same three-spring series system, node 1 is fixed (u1 = 0), F2 = 50 N at node 2, F3 = 0 at node 3, and node 4 is fixed (u4 = 0).\n\n(a) Solve for the displacements u2 and u3.\n(b) Now recover the reaction forces at nodes 1 and 4. Use the original full 4x4 system.\n(c) Verify your answer: do the reactions and applied forces satisfy global equilibrium?\n(d) What would happen to the reactions if you changed the stiffness values but kept the same BCs and loads?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Solve for displacements",
+          "content": "det = 250*350 - 150*150 = 65000. u2 = 17500/65000 = 7/26. u3 = 7500/65000 = 3/26.",
+          "physical_reasoning": "Both positive — both nodes move right. u2 > u3 — node 2 is closer to the applied force. Makes physical sense."
+        },
+        {
+          "step": 2,
+          "description": "Recover reactions",
+          "content": "F1 = -100*u2 = -700/26 ≈ -26.92 N. F4 = -200*u3 = -600/26 ≈ -23.08 N.",
+          "physical_reasoning": "Both reactions are negative — both walls push to the left, opposing the rightward applied force."
+        },
+        {
+          "step": 3,
+          "description": "Verify global equilibrium",
+          "content": "F1 + F2 + F3 + F4 = -26.92 + 50 + 0 + (-23.08) = 0.",
+          "physical_reasoning": "The sum of all external forces must equal zero. The structure is in static equilibrium."
+        },
+        {
+          "step": 4,
+          "description": "Effect of changing stiffnesses",
+          "content": "Displacements change but total reaction still equals -50 N. Distribution between supports changes.",
+          "physical_reasoning": "Global equilibrium depends only on applied loads and support conditions, not on internal stiffness. Changing stiffnesses changes deformation and load distribution, but total reaction must always balance total applied load."
+        }
+      ],
+      "final_answer": "(a) u2 = 7/26, u3 = 3/26. (b) R1 ≈ -26.9 N, R4 ≈ -23.1 N. (c) Sum = 0, equilibrium confirmed. (d) Distribution changes but total reaction stays -50 N.",
+      "expert_narration": "We have the reduced system and we can solve it. The algebra is straightforward — two equations, two unknowns. I get u2 and u3, both positive, meaning both free nodes move to the right. Before moving on, I always do a quick sanity check: is this reasonable? I am pushing node 2 to the right, so it should move right. Node 3 is dragged along. Node 2 moves more than node 3 — it is closer to the load. Everything checks out.\n\nBut I am not done. Many students stop here, and that is a mistake. I still need the reaction forces. The walls at nodes 1 and 4 are pushing back — how hard? To find reactions, I go back to the original full system. I now know all four displacements: u = [0, u2, u3, 0]. I compute F = Ku for all four equations. Rows 1 and 4 give me the reactions.\n\nNow the critical verification: F1 + F2 + F3 + F4 must equal zero. This is global equilibrium. If this were not zero, something went wrong.\n\nAnd here is a beautiful insight about part (d). If I change the spring stiffnesses, the displacements change, the internal force distribution changes, but the total reaction still equals -50 N. It has to — the total applied load is 50 N and equilibrium requires the supports to resist exactly that. The stiffness determines how the 50 N splits between the two supports, but the total is fixed by equilibrium alone.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Solve the 2x2 system for u2 and u3. Then for reactions, go back to the full 4x4 system with u = [0, u2, u3, 0]. Multiply K by u and look at rows 1 and 4.",
+        "level_1": "Solve for displacements, recover reactions, and verify equilibrium. Show your physical reasoning at each step."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Checks qualitative behavior before computing",
+          "Recovers reactions using the full system",
+          "Verifies global equilibrium as a mandatory check",
+          "Recognizes that total reactions depend only on total applied load"
+        ],
+        "negative": [
+          "Solves for displacements and stops",
+          "Cannot explain what the reaction forces represent",
+          "Does not verify equilibrium",
+          "Thinks changing stiffnesses would change total reaction"
+        ]
+      }
+    },
+    "SOL_A": {
+      "problem_id": "SOL_A",
+      "node": "solution",
+      "targets_los": ["LO1", "LO2", "LO4"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "The three-spring series system has: k1 = 100, k2 = 150, k3 = 200 N/m. Node 1 fixed (u1 = 0), node 4 fixed (u4 = 0). F2 = 50 N, F3 = 0.\n\nReduced system: [[250, -150], [-150, 350]] [u2, u3]^T = [50, 0]^T\n\n(a) Before solving, predict: which direction should u2 and u3 move? Should one be larger than the other?\n(b) Solve for u2 and u3.\n(c) For each spring, compute the extension and internal spring force. State whether each spring is in tension or compression.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Qualitative prediction",
+          "content": "Both positive (rightward). u2 > u3.",
+          "physical_reasoning": "Pushing node 2 right with 50 N. Node 3 dragged along but less because it is closer to the stiff wall at node 4 (k3 = 200)."
+        },
+        {
+          "step": 2,
+          "description": "Solve the system",
+          "content": "det = 65000. u2 = 7/26 ≈ 0.2692. u3 = 3/26 ≈ 0.1154.",
+          "physical_reasoning": "Both positive, u2 > u3. Matches prediction. Spring 3 is stiffest, so it resists node 3's movement more."
+        },
+        {
+          "step": 3,
+          "description": "Element forces",
+          "content": "Spring 1: delta = 7/26, f1 = 100*(7/26) ≈ 26.92 N tension. Spring 2: delta = -4/26, f2 = 150*(-4/26) ≈ -23.08 N compression. Spring 3: delta = -3/26, f3 = 200*(-3/26) ≈ -23.08 N compression.",
+          "physical_reasoning": "Spring 1 tension — node 2 moved away from fixed node 1. Springs 2 and 3 compression — gap between nodes decreased. Springs 2 and 3 carry equal force magnitude because node 3 has no applied force — equilibrium at node 3 requires the forces to balance."
+        }
+      ],
+      "final_answer": "u2 = 7/26 ≈ 0.269, u3 = 3/26 ≈ 0.115. Spring 1: 26.9 N tension. Spring 2: 23.1 N compression. Spring 3: 23.1 N compression.",
+      "expert_narration": "Before I touch the algebra, I want to predict what should happen. I am pushing node 2 to the right. Both walls are fixed. Node 2 should move right, and it should drag node 3 along to the right as well. But node 3 is closer to the stiff wall at node 4 (Spring 3 has k = 200), so it should move less. Both displacements positive, u2 bigger than u3. If my answer contradicts this prediction, I know I made an error somewhere.\n\nNow I solve. Two equations, two unknowns, straightforward. I get u2 approximately 0.269 and u3 approximately 0.115. Both positive, u2 > u3. Matches my prediction. Good.\n\nBut I am only halfway done. The displacements tell me where the nodes end up, but for engineering purposes I usually care more about what is happening inside the elements. Is the spring in tension or compression? How much force is it carrying?\n\nFor each spring, I compute the extension: displacement of right node minus left node. Spring 1: u2 - u1 = 0.269. Positive — stretched — tension. Force: 100 times 0.269 equals about 26.9 N.\n\nSpring 2: u3 - u2 = 0.115 - 0.269 = -0.154. Negative — shortened — compression. Force: 150 times (-0.154) equals about -23.1 N.\n\nSpring 3: u4 - u3 = 0 - 0.115 = -0.115. Negative — compression. Force: 200 times (-0.115) equals about -23.1 N.\n\nInteresting — Springs 2 and 3 carry the same magnitude of force. Let me check if this makes sense. Node 3 has no applied external force. So the internal forces from the two springs connected to it must balance. This is not a coincidence — it is equilibrium at node 3, and it gives me confidence the answer is correct.",
+      "scaffolded_versions": {
+        "level_3": "For part (a), think about which direction the 50 N is pushing. For part (c), I will help with Spring 1: its extension is u2 - u1 = 0.269 - 0 = 0.269. The force is 100 * 0.269 ≈ 26.9 N. Is that tension or compression? Now do the same for Springs 2 and 3.",
+        "level_2": "Start with a qualitative prediction. Then solve the 2x2 system. For element forces: extension = right node minus left node. Positive = tension.",
+        "level_1": "Work through all three parts. Start with your physical prediction, then solve, then back-substitute. Interpret every sign physically."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Makes qualitative prediction before solving and checks against it",
+          "Computes element extensions and correctly identifies tension vs compression",
+          "Verifies internal equilibrium at unloaded nodes",
+          "Interprets every sign physically"
+        ],
+        "negative": [
+          "Solves without predicting what to expect",
+          "Cannot determine tension vs compression from sign of extension",
+          "Reports numerical answers without physical interpretation",
+          "Does not check equilibrium at intermediate nodes"
+        ]
+      }
+    },
+    "SOL_B": {
+      "problem_id": "SOL_B",
+      "node": "solution",
+      "targets_los": ["LO3", "LO4"],
+      "targets_misconceptions": ["M2", "M4"],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "Continuing from Problem A with u = [0, 7/26, 3/26, 0]:\n\n(a) Compute the reaction forces at nodes 1 and 4 using the full 4x4 global system.\n(b) The internal force in Spring 1 is approximately 26.9 N in tension. The reaction at node 1 is approximately -26.9 N. Are these the same thing? Explain the relationship and the difference.\n(c) Verify global equilibrium: do all external forces (applied loads plus reactions) sum to zero? What would it mean if they did not?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Compute reactions",
+          "content": "F1 = -100*(7/26) ≈ -26.92 N. F4 = -200*(3/26) ≈ -23.08 N.",
+          "physical_reasoning": "Go back to the full 4x4 system. The reactions live at the constrained DOFs — the rows eliminated during reduction. Plug in all four displacements and read off F1 and F4."
+        },
+        {
+          "step": 2,
+          "description": "Element force vs reaction",
+          "content": "Same magnitude but different physical quantities.",
+          "physical_reasoning": "Here they are equal because node 1 connects to only one spring. If node 1 connected to two springs, the reaction would be the sum of both. The reaction is the total external force at the support. The element force is internal to a single element."
+        },
+        {
+          "step": 3,
+          "description": "Global equilibrium",
+          "content": "-26.92 + 50 + 0 + (-23.08) = 0.",
+          "physical_reasoning": "The structure is in static equilibrium. If this sum were not zero, there is an error. This is a non-negotiable check."
+        }
+      ],
+      "final_answer": "(a) R1 ≈ -26.9 N, R4 ≈ -23.1 N. (b) Same magnitude here because one spring connects to node 1; different in general. (c) Sum = 0, equilibrium confirmed.",
+      "expert_narration": "I have displacements and element forces, but I still need reactions. This is the step many students skip, and in practice it is one of the most important results.\n\nTo get reactions, I go back to the full system. I now know all four displacements. I compute F = Ku for all four equations. Rows 2 and 3 should give me back 50 and 0 — a consistency check. Rows 1 and 4 give me the reactions.\n\nNow, a subtle point. The reaction at node 1 is -26.9 N, and the internal force in Spring 1 is 26.9 N tension. Same magnitude, opposite sign. Are they the same thing? Not quite. The reaction is the external force the wall applies to node 1. The spring force is the internal force in the element. Here they are equal because node 1 only connects to Spring 1. But if node 1 were a junction connected to three springs, the reaction would be the sum of all three spring forces at that node.\n\nFinally, the check: sum all external forces. -26.9 + 50 + 0 + (-23.1) = 0. Equilibrium confirmed. If this were not zero, I would go back and find my error before reporting any results.",
+      "scaffolded_versions": {
+        "level_3": "For reactions, write out the full equation for row 1: F1 = K11*u1 + K12*u2 + K13*u3 + K14*u4. You know all four displacements. What is F1? For part (b), think about what would happen if node 1 were connected to two springs.",
+        "level_2": "Use the full system F = Ku with all four displacements to compute F1 and F4. Then think about the difference between a reaction and a spring force.",
+        "level_1": "Compute reactions, explain the difference between reactions and element forces, and verify global equilibrium."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Uses the full system to compute reactions",
+          "Clearly distinguishes between reaction forces and element internal forces",
+          "Explains when they coincide and when they differ",
+          "Verifies global equilibrium as mandatory"
+        ],
+        "negative": [
+          "Tries to compute reactions from the reduced system",
+          "Says 'the reaction equals the spring force' without qualification",
+          "Does not check global equilibrium",
+          "Reports values without interpreting direction"
+        ]
+      }
+    },
+    "SOL_C": {
+      "problem_id": "SOL_C",
+      "node": "solution",
+      "targets_los": ["LO1", "LO2", "LO3", "LO4"],
+      "targets_misconceptions": ["M1", "M5"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY"],
+      "statement": "Consider a new configuration: same springs k1=100, k2=150, k3=200 N/m. Node 1 fixed (u1=0). Node 4 is free. Applied forces: F2=0, F3=-30 N (leftward), F4=80 N (rightward).\n\n(a) Predict qualitatively: which direction should each free node move? Which springs will be in tension/compression?\n(b) Set up and solve the reduced system.\n(c) Compute element extensions and forces for all three springs.\n(d) Compute the reaction at node 1.\n(e) Verify global equilibrium and verify equilibrium at each individual node.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Qualitative prediction",
+          "content": "All nodes move right. u4 > u3 > u2. Spring 2 direction uncertain without calculation.",
+          "physical_reasoning": "Net force is 80 - 30 = 50 N rightward. Node 4 pushed hardest. Spring 1 should be tension. Spring 3 should be tension. Spring 2 could go either way."
+        },
+        {
+          "step": 2,
+          "description": "Solve",
+          "content": "3x3 reduced system. u2 = 0.5, u3 = 5/6 ≈ 0.833, u4 = 37/30 ≈ 1.233.",
+          "physical_reasoning": "All positive, u4 > u3 > u2. Prediction confirmed."
+        },
+        {
+          "step": 3,
+          "description": "Element forces",
+          "content": "Spring 1: delta=0.5, f=50 N tension. Spring 2: delta=0.333, f=50 N tension. Spring 3: delta=0.4, f=80 N tension.",
+          "physical_reasoning": "All tension. Load path: 80 N enters at node 4, Spring 3 carries 80 N to node 3. At node 3, 30 N absorbed by external force, 50 N continues through Spring 2 to node 2. At node 2, 50 N passes through Spring 1 to the wall."
+        },
+        {
+          "step": 4,
+          "description": "Reaction",
+          "content": "R1 = -100*0.5 = -50 N.",
+          "physical_reasoning": "Wall pushes left with 50 N, balancing the 50 N tension in Spring 1."
+        },
+        {
+          "step": 5,
+          "description": "Verify equilibrium",
+          "content": "Global: -50 + 0 + (-30) + 80 = 0. Each node balances individually.",
+          "physical_reasoning": "Complete load path traced and verified at every node. 80 N enters at node 4, 30 N absorbed at node 3, 50 N reaches the wall."
+        }
+      ],
+      "final_answer": "u2=0.5, u3≈0.833, u4≈1.233. All springs in tension: f1=50, f2=50, f3=80 N. R1=-50 N. All equilibrium checks pass.",
+      "expert_narration": "This is a complete FEA analysis from start to finish. Let me walk through the full process.\n\nFirst, my prediction. Two forces acting in opposite directions: 80 N pushing node 4 right and 30 N pushing node 3 left. Net effect should be rightward movement. Node 4 should move most. All springs should be in tension because the whole chain is pulled right relative to the fixed wall. But Spring 2 is interesting — the 30 N leftward force at node 3 works against the rightward pull.\n\nI solve the 3x3 system. u2 = 0.5, u3 approximately 0.833, u4 approximately 1.233. All positive, u4 > u3 > u2. Prediction confirmed.\n\nElement forces: Spring 1 is 50 N tension, Spring 2 is 50 N tension, Spring 3 is 80 N tension. All tension.\n\nNow I can trace the load path. The 80 N enters at node 4. Spring 3 carries all of it to node 3. At node 3, 30 N is absorbed by the external force pushing left. That leaves 50 N to continue through Spring 2 to node 2. At node 2, no external force, so the full 50 N passes to Spring 1. Spring 1 carries it to the wall, which reacts with -50 N.\n\nGlobal check: -50 + 0 + (-30) + 80 = 0. Each node checks individually. The analysis is complete and verified.\n\nThis is the workflow for every FEA problem: predict, solve, back-substitute, recover reactions, verify.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Start with a qualitative prediction. Then set up the 3x3 reduced system. After solving, compute each spring's extension and force. Finally, get the reaction and check equilibrium globally and at each node.",
+        "level_1": "Complete the full analysis cycle: predict, solve, back-substitute, recover reactions, and verify equilibrium at every level."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Makes qualitative prediction including identifying uncertainty about Spring 2",
+          "Traces the load path through the structure",
+          "Verifies equilibrium at every node individually",
+          "Interprets results as a complete physical picture"
+        ],
+        "negative": [
+          "Solves without predicting",
+          "Reports element forces without stating tension or compression",
+          "Checks only global equilibrium",
+          "Cannot trace the load path"
+        ]
+      }
+    },
+    "VER_A": {
+      "problem_id": "VER_A",
+      "node": "verification",
+      "targets_los": ["LO1", "LO2", "LO3"],
+      "targets_misconceptions": [],
+      "difficulty": "foundational",
+      "used_in_states": ["MODEL", "GUIDED_PRACTICE"],
+      "statement": "A student solved the three-spring series system (k1=100, k2=150, k3=200, nodes 1,4 fixed, F2=50, F3=0) and obtained:\n\nu2 = 0.269, u3 = 0.115\n\nSpring forces: f1 = 26.9 N (tension), f2 = 23.1 N (compression), f3 = 23.1 N (compression)\n\nReactions: R1 = -26.9 N, R4 = -23.1 N\n\n(a) Verify global equilibrium. Does it check out?\n(b) Verify equilibrium at each individual node. Do they all check out?\n(c) The student says 'Spring 2 is in compression.' Without redoing any calculation, can you tell whether this is consistent with the displacement values? Explain your reasoning.",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Global equilibrium",
+          "content": "-26.9 + 50 + 0 + (-23.1) = 0.",
+          "physical_reasoning": "Global equilibrium holds. But this is necessary not sufficient — local errors can cancel at the global level."
+        },
+        {
+          "step": 2,
+          "description": "Node-level equilibrium",
+          "content": "Each node balances when forces are applied with correct sign conventions.",
+          "physical_reasoning": "Must be careful with sign conventions. The element equation Ku = F gives external forces, not spring forces on the node. The spring's force on the node is the negative of the external force."
+        },
+        {
+          "step": 3,
+          "description": "Compression consistency check",
+          "content": "u2 = 0.269 > u3 = 0.115, so delta2 = u3 - u2 < 0. Spring shortened. Compression is consistent.",
+          "physical_reasoning": "No recalculation needed. If u2 > u3, the endpoints got closer — the spring compressed. Quick sanity check that catches errors without repeating calculations."
+        }
+      ],
+      "final_answer": "(a) Global equilibrium holds. (b) All nodes balance. (c) u2 > u3 means Spring 2 shortened — compression is consistent.",
+      "expert_narration": "Let me walk through verification the way I do it in practice. I have results and need to convince myself they are correct without redoing the entire analysis.\n\nFirst, global equilibrium. -26.9 + 50 + 0 + (-23.1) = 0. Good. But this is a weak check — errors can cancel at the global level.\n\nNode-by-node equilibrium requires careful sign conventions. At each node, the forces from all connected springs plus any external force must sum to zero. I use the element stiffness equations directly to avoid confusion between internal spring force and the force the spring exerts on a particular node.\n\nFinally, the quick qualitative check. Spring 2 in compression? Node 2 moved more than node 3 — they got closer together — yes, compression is consistent. I did not need any arithmetic for this. Just comparing displacements. This kind of reasoning is what separates an engineer who understands the physics from one who just runs software and hopes for the best.",
+      "scaffolded_versions": {
+        "level_3": "For global equilibrium, just add up all external forces: R1 + F2 + F3 + R4. Does it equal zero? For the compression check, look at u2 and u3. If u2 > u3, did the spring get longer or shorter?",
+        "level_2": "Check equilibrium at both global and node level. Be careful about sign conventions. Use element stiffness equations to compute forces on individual nodes.",
+        "level_1": "Perform the full verification. Confirm these results using independent checks, not by repeating the original calculation."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Recognizes global equilibrium is necessary but not sufficient",
+          "Carefully handles sign conventions at node level",
+          "Uses displacement comparison as quick qualitative check",
+          "Treats verification as independent confirmation, not repetition"
+        ],
+        "negative": [
+          "Only checks global equilibrium and declares answer correct",
+          "Gets confused by sign conventions at node level",
+          "Cannot determine tension/compression from displacements alone",
+          "Treats verification as optional"
+        ]
+      }
+    },
+    "VER_B": {
+      "problem_id": "VER_B",
+      "node": "verification",
+      "targets_los": ["LO3", "LO4"],
+      "targets_misconceptions": ["M1", "M3"],
+      "difficulty": "conceptual",
+      "used_in_states": ["GUIDED_PRACTICE", "DIAGNOSE"],
+      "statement": "A student runs an FEA analysis on the same three-spring system (k1=100, k2=150, k3=200, node 1 fixed, node 4 fixed, F2=50, F3=0) and obtains:\n\nu2 = -0.3, u3 = 0.2\n\nThe student reports this without further checking.\n\n(a) Without solving the system yourself, can you tell that this answer is wrong? How?\n(b) What specific error might produce this kind of result? Propose at least two possible sources.\n(c) What verification steps should the student have performed before reporting this answer?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Identify the answer is wrong",
+          "content": "u2 = -0.3 means node 2 moved left. But it is being pushed right with 50 N. Physically impossible.",
+          "physical_reasoning": "There is no mechanism to push node 2 left. The springs can only resist the rightward push. A negative displacement contradicts the most basic physical expectation."
+        },
+        {
+          "step": 2,
+          "description": "Possible error sources",
+          "content": "Sign error in applied force, wrong node fixed, assembly error, sign convention error in stiffness matrix.",
+          "physical_reasoning": "The negative u2 strongly suggests the force was applied in the wrong direction or the boundary conditions were wrong."
+        },
+        {
+          "step": 3,
+          "description": "Verification steps",
+          "content": "Qualitative prediction, check prediction against solution, global equilibrium, node-level equilibrium.",
+          "physical_reasoning": "The qualitative prediction alone would have caught this instantly. Before any analysis, ask: which way should things move?"
+        }
+      ],
+      "final_answer": "(a) u2 negative is physically impossible — force pushes right. (b) Wrong force sign, wrong BCs, assembly error. (c) Predict, check, verify equilibrium.",
+      "expert_narration": "I want you to look at this answer and tell me what is wrong before doing any arithmetic. Just think about the physics.\n\nI push node 2 to the right with 50 N. Both ends are fixed. What happens? Node 2 moves right. That is the only possibility. So u2 = -0.3 is immediately suspect.\n\nWhat went wrong? Maybe the force sign is wrong. Maybe wrong nodes are fixed. Maybe an assembly error. The key diagnostic clue is that the sign of u2 contradicts the most basic physical expectation.\n\nThe lesson: the student reported this without verification. In a homework problem, that is a lost mark. In professional practice, that is a structural failure waiting to happen. The qualitative prediction is your cheapest and most powerful tool. It requires zero computation and catches the most egregious errors instantly.\n\nNever trust a number that contradicts your physical intuition. Find the error first, then report.",
+      "scaffolded_versions": {
+        "level_3": "Focus on u2 = -0.3. Node 2 is being pushed right with 50 N. Both walls are fixed. Can node 2 move to the left?",
+        "level_2": "Before doing any math, think about what the displacements should look like. Does the reported answer match? If not, what could have gone wrong?",
+        "level_1": "Evaluate these results purely from physical reasoning. Identify the problem, diagnose possible causes, and describe the verification process."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Immediately identifies sign of u2 as physically impossible without computation",
+          "Proposes specific error sources tied to the discrepancy",
+          "Articulates qualitative prediction as first and cheapest verification tool",
+          "Treats verification as professional practice"
+        ],
+        "negative": [
+          "Tries to recompute rather than applying physical reasoning first",
+          "Cannot identify the problem without full calculation",
+          "Cannot propose plausible error sources",
+          "Does not see verification as essential"
+        ]
+      }
+    },
+    "VER_C": {
+      "problem_id": "VER_C",
+      "node": "verification",
+      "targets_los": ["LO1", "LO2", "LO3", "LO4"],
+      "targets_misconceptions": ["M1", "M4", "M5"],
+      "difficulty": "challenging",
+      "used_in_states": ["ASSESS_MASTERY"],
+      "statement": "You are given complete results for the three-spring series system (k1=100, k2=150, k3=200, node 1 fixed, node 4 fixed, F2=50, F3=0).\n\nA colleague gives you:\n\nu2 = 0.269, u3 = 0.115\n\nSpring forces: f1 = 26.9 N (tension), f2 = 30.8 N (compression), f3 = 23.1 N (compression)\n\nReactions: R1 = -26.9 N, R4 = -23.1 N\n\n(a) Verify global equilibrium.\n(b) Verify equilibrium at node 2. Does it balance?\n(c) Verify equilibrium at node 3. Does it balance?\n(d) One spring force is wrong. Identify which one and determine the correct value using only the equilibrium check.\n(e) What verification habit would have caught this error immediately without checking every node?",
+      "solution_steps": [
+        {
+          "step": 1,
+          "description": "Global equilibrium",
+          "content": "-26.9 + 50 + 0 + (-23.1) = 0.",
+          "physical_reasoning": "Global equilibrium holds. The error is hidden at the global level."
+        },
+        {
+          "step": 2,
+          "description": "Equilibrium at node 2",
+          "content": "Spring 1 pulls left (-26.9) + Spring 2 pushes left (-30.8) + F2 (+50) = -7.7. Does not balance.",
+          "physical_reasoning": "Node 2 is not in equilibrium with the reported spring forces."
+        },
+        {
+          "step": 3,
+          "description": "Equilibrium at node 3",
+          "content": "Spring 2 pushes right (+30.8) + Spring 3 pushes left (-23.1) = +7.7. Does not balance.",
+          "physical_reasoning": "Imbalance is exactly opposite to node 2's. The error is in the element shared by both nodes — Spring 2."
+        },
+        {
+          "step": 4,
+          "description": "Correct value",
+          "content": "f2 = 150*(0.115 - 0.269) = 150*(-0.154) = -23.1 N compression. Not 30.8.",
+          "physical_reasoning": "With correction, both nodes balance. The equal-and-opposite imbalance at connected nodes localizes the error to the shared element."
+        },
+        {
+          "step": 5,
+          "description": "Quick verification habit",
+          "content": "Node 3 has no applied force, so f2 and f3 must have equal magnitudes. 30.8 != 23.1 — immediate red flag.",
+          "physical_reasoning": "The unloaded node argument: at a node with no external force, connected spring forces must balance. Comparing two numbers catches the error in seconds."
+        }
+      ],
+      "final_answer": "(a) Global equilibrium holds. (b) Node 2 does not balance (-7.7 imbalance). (c) Node 3 does not balance (+7.7). (d) f2 should be 23.1, not 30.8. (e) Unloaded node check: f2 must equal f3 at node 3.",
+      "expert_narration": "My colleague hands me results and I need to decide: are they correct? Let me not re-solve the problem. Instead, I will use verification checks.\n\nGlobal equilibrium: -26.9 + 50 + 0 + (-23.1) = 0. Looks good. But I know this is a weak test. Let me go node by node.\n\nNode 2: three forces. Spring 1 pulls left (26.9), Spring 2 pushes left (30.8), applied force pushes right (50). Total: -26.9 - 30.8 + 50 = -7.7. Not zero. Something is wrong.\n\nNode 3: two springs, no applied load. Spring 2 pushes right (30.8), Spring 3 pushes left (23.1). Total: 30.8 - 23.1 = +7.7. Also not zero. And the imbalance is exactly the opposite of node 2. Dead giveaway — the error is in Spring 2, the element shared by both nodes.\n\nBut I could have caught this even faster. Node 3 has no applied force. The two springs must carry equal force magnitudes. f2 = 30.8 and f3 = 23.1. Not equal. Error found in less than two seconds.\n\nThe correct f2 is 150 times (0.115 - 0.269) = 23.1 N compression. The colleague probably made an arithmetic error.\n\nThe lesson: physical reasoning is your fastest verification tool. Before checking any arithmetic, ask what the physics demands.",
+      "scaffolded_versions": {
+        "level_3": null,
+        "level_2": "Check equilibrium at each node using the reported spring forces. If any node does not balance, the error is in a spring connected to that node. See if the imbalance pattern points to a specific element.",
+        "level_1": "Verify these results using only equilibrium checks. Find the error, correct it, and explain what habit catches it immediately."
+      },
+      "evaluation_markers": {
+        "positive": [
+          "Recognizes global equilibrium passing does not guarantee correctness",
+          "Uses node-level equilibrium to localize the error",
+          "Identifies equal-and-opposite imbalance as pointing to shared element",
+          "Uses the unloaded node argument as fastest diagnostic",
+          "Computes correct value and verifies both nodes balance"
+        ],
+        "negative": [
+          "Accepts results after global equilibrium passes",
+          "Re-solves from scratch instead of using verification checks",
+          "Cannot localize the error from node imbalances",
+          "Does not recognize the unloaded node shortcut",
+          "Treats exercise as arithmetic rather than professional verification"
+        ]
+      }
+    }
+  }
+}

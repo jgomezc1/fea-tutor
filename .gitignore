@@ -1,0 +1,23 @@
+# API keys and secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Pytest
+.pytest_cache/
+
+# Student state files (contain session data, not code)
+data/student_*.json
+!data/student_model_template.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

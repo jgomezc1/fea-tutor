@@ -1,0 +1,111 @@
+{
+  "student_id": "default",
+  "current_node": "element_stiffness",
+  "current_state": "ASSESS_PRIOR",
+  "scaffolding_level": 3,
+  "nodes": {
+    "element_stiffness": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed"
+      }
+    },
+    "local_global_dofs": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "assembly": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "boundary_conditions": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "solution": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "verification": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    }
+  },
+  "interaction_count": 0,
+  "session_history": [],
+  "bkt_params": {
+    "p_transit": 0.2,
+    "p_slip": 0.1,
+    "p_guess": 0.05,
+    "mastery_threshold": 0.90
+  }
+}
