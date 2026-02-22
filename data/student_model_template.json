@@ -98,6 +98,196 @@
         "LO3": "not_assessed",
         "LO4": "not_assessed"
       }
+    },
+    "bar_element": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed"
+      }
+    },
+    "two_d_dofs": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "coordinate_transformation": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "global_element_stiffness": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "truss_assembly_solution": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "truss_force_recovery": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "beam_element": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed"
+      }
+    },
+    "frame_element": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "frame_transformation": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "frame_global_stiffness": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "frame_assembly_solution": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
+    },
+    "frame_force_recovery": {
+      "p_mastery": 0.1,
+      "attempts": 0,
+      "misconceptions_observed": [],
+      "misconceptions_resolved": [],
+      "scaffolding_history": [],
+      "level0_passed": false,
+      "diagnose_count": 0,
+      "remediation_attempts": {},
+      "lo_status": {
+        "LO1": "not_assessed",
+        "LO2": "not_assessed",
+        "LO3": "not_assessed",
+        "LO4": "not_assessed"
+      }
     }
   },
   "interaction_count": 0,
@@ -106,6 +296,6 @@
     "p_transit": 0.2,
     "p_slip": 0.1,
     "p_guess": 0.05,
-    "mastery_threshold": 0.90
+    "mastery_threshold": 0.9
   }
 }

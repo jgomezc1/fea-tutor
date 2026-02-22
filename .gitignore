@@ -13,6 +13,7 @@ __pycache__/
 # Student state files (contain session data, not code)
 data/student_*.json
 !data/student_model_template.json
+students/
 
 # IDE
 .vscode/

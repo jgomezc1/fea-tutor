@@ -68,13 +68,35 @@ DAG of concept nodes with edges representing prerequisites. Each node has:
 - Known misconceptions with descriptions
 - Physical reasoning markers (positive and negative indicators)
 
-All 6 nodes are fully implemented with learning objectives, misconceptions, and physical reasoning markers:
+18 nodes across 3 modules, all fully implemented with learning objectives, misconceptions, and physical reasoning markers:
+
+**Module 1 — Springs (Direct Stiffness Method foundations):**
 1. `element_stiffness` — Element stiffness matrix derivation
 2. `local_global_dofs` — Local vs global DOF mapping
 3. `assembly` — Global stiffness matrix assembly
 4. `boundary_conditions` — Applying boundary conditions
 5. `solution` — Solving and back-substitution
 6. `verification` — Verification and interpretation of results
+
+**Module 2 — Truss Elements (2D extension):**
+7. `bar_element` — From spring to bar element (EA/L derivation)
+8. `two_d_dofs` — Degrees of freedom in 2D (2 DOFs per node, local vs global dimensions)
+9. `coordinate_transformation` — The transformation matrix T (projection onto local axes)
+10. `global_element_stiffness` — Transformed element stiffness (K_global = T^T K_local T)
+11. `truss_assembly_solution` — Truss system analysis (IBC-based assembly, upgraded from Module 1's elimination approach)
+12. `truss_force_recovery` — Force recovery and verification (back-transform, tension/compression, joint equilibrium)
+
+Module 2 running example: two-bar symmetric truss with nodes at (0,0), (3,0), (1.5,1.5).
+
+**Module 3 — Frame Elements (beams and frames):**
+13. `beam_element` — Beam element stiffness matrix (4×4 Euler-Bernoulli, bending DOFs)
+14. `frame_element` — Frame element stiffness matrix (6×6 = bar + beam, combining axial and bending)
+15. `frame_transformation` — 6×6 coordinate transformation (θ invariance of bending DOFs)
+16. `frame_global_stiffness` — Global frame element stiffness (T^T K_local T for 6×6)
+17. `frame_assembly_solution` — Frame system assembly and solution (portal frame analysis)
+18. `frame_force_recovery` — Frame force recovery (shear/moment diagrams, member-end forces)
+
+Module 3 running example: portal frame.
 
 ### `problem_bank.json`
 Curated problems with full metadata. Each problem has:
@@ -84,13 +106,41 @@ Curated problems with full metadata. Each problem has:
 - Evaluation markers (positive/negative physical reasoning indicators)
 - Target LOs and misconceptions
 
-18 problems total (3 per node), each with full metadata:
+54 problems total (3 per node), each with full metadata:
+
+**Module 1 (18 problems):**
 - `ES_A`, `ES_B`, `ES_C`: Element stiffness matrix (derive, interpret physically, singularity/rigid body modes)
 - `DOF_A`, `DOF_B`, `DOF_C`: Local vs global DOFs (series spring mapping, relabeling nodes, branching topology)
 - `ASM_A`, `ASM_B`, `ASM_C`: Assembly (three-spring series assembly, overlapping contributions interpretation, four-node topology)
 - `BC_A`, `BC_B`, `BC_C`: Boundary conditions (fixed DOF elimination, prescribed displacement, mixed BCs)
 - `SOL_A`, `SOL_B`, `SOL_C`: Solution (partition and solve, back-substitution for reactions, alternate configuration)
 - `VER_A`, `VER_B`, `VER_C`: Verification (equilibrium check, energy-based verification, complete results interpretation)
+
+**Module 2 (18 problems):**
+- `BAR_A`, `BAR_B`, `BAR_C`: Bar element (EA/L derivation, parameter variation, spring-to-bar comparison)
+- `TDOF_A`, `TDOF_B`, `TDOF_C`: 2D DOFs (DOF identification, local vs global decomposition, zero perpendicular stiffness)
+- `CT_A`, `CT_B`, `CT_C`: Coordinate transformation (build T from angle, verify orthogonality, apply T to displacements)
+- `GES_A`, `GES_B`, `GES_C`: Global element stiffness (compute T^T K T, verify properties, predict patterns from angle)
+- `TAS_A`, `TAS_B`, `TAS_C`: Truss assembly/solution (IBC array, reduced system assembly, full truss solve)
+- `TFR_A`, `TFR_B`, `TFR_C`: Force recovery (back-transform displacements, axial forces, joint equilibrium verification)
+
+**Module 3 (18 problems):**
+- `BEAM_A`, `BEAM_B`, `BEAM_C`: Beam element (4×4 Euler-Bernoulli derivation, physical interpretation, fixed-end beam)
+- `FRAME_A`, `FRAME_B`, `FRAME_C`: Frame element (6×6 assembly from bar+beam, DOF interpretation, load path reasoning)
+- `FT_A`, `FT_B`, `FT_C`: Frame transformation (6×6 T matrix, θ invariance of bending, apply to inclined member)
+- `FGS_A`, `FGS_B`, `FGS_C`: Global frame stiffness (T^T K T for 6×6, symmetry verification, angle variation)
+- `FAS_A`, `FAS_B`, `FAS_C`: Frame assembly/solution (portal frame assembly, load application, full frame solve)
+- `FFR_A`, `FFR_B`, `FFR_C`: Frame force recovery (member-end forces, shear/moment diagrams, joint equilibrium)
+
+### `notebook_function_map.json` and `notebook_reference_kb.json`
+Notebook knowledge layer: structured references from the 3 course Jupyter notebooks (springs, trusses, frames). Contains:
+- 15 function entries across 6 function families (uelXXX, eqcounter, DME, assembly, loadasem, main_program)
+- Each entry has: code, expert narration, curriculum node mapping, teaching questions, and what-to-notice lists
+- Cross-module evolution narratives showing how the same algorithm scales from 1 to 2 to 3 DOFs per node
+- Evolution summary table (6 rows × 5 columns) for REFLECTION/ADVANCE states
+- Curriculum-vs-notebook difference notes where the notebook approach differs from the curriculum (e.g., frame element)
+
+The teacher agent displays code during MODEL state, uses it for coaching reference during GUIDED_PRACTICE, and shows cross-module comparisons during ADVANCE transitions. Retrieved via `core/notebook_knowledge.py`.
 
 ### `student_model_template.json`
 Template for new student state. Includes BKT parameters:
@@ -119,6 +169,39 @@ python main.py --resume data/student_alice.json --debug
 - `/debug` — Toggle debug output
 - `/quit` — Save and exit
 
+## Spring-Agent Bridge (Phase 2)
+- Bridge module: `core/spring_agent_bridge.py`
+- Wraps spring-agent (`../spring-agent`) solver and tools for tutor use
+- 3 modes: programmatic demos (MODEL), answer verification (GUIDED_PRACTICE), full access (EXPLORATION placeholder)
+- 7 pre-defined examples matching curriculum problems (single spring, 3-spring series, parallel, branching, nb01 main, failure cascade, sensitivity)
+- Node-to-example mapping in `NODE_TO_EXAMPLE` (Module 1 only — spring-agent handles 1D spring-particle systems)
+- Graceful degradation: tutor works without spring-agent (bridge returns None via lazy init)
+- Path configurable via `SPRING_AGENT_PATH` env var (default: `../spring-agent`)
+
+## Notebook Code Executor (Phase 3)
+- `core/notebook_executor.py`: Live execution of notebook functions during teaching
+- Per-module namespaces: module1_springs, module2_trusses, module3_frames
+- 15 functions pre-loaded across 3 modules (5 per module: uelXXX, eqcounter, DME, assembly, loadasem)
+- 6 curated demos with step-by-step narration mapped to curriculum nodes
+- Student code verification: execute student code and compare against expected values
+- Integrated into teacher context during MODEL state (code_demo key)
+- Fixed `np.integer` and `np.int` deprecations in `notebook_reference_kb.json`
+
+## Student Persistence
+- `core/persistence_manager.py`: Multi-session progress tracking
+- Auto-saves after every state transition via `on_transition` callback (atomic writes)
+- Session resume with welcome-back context for teacher prompt
+- Backup/restore for corruption recovery
+- Multi-student support with isolated state files in `students/`
+- Transcript export for instructor review
+- CLI: `python start_session.py <student_id>`
+
+## Simulation Harness
+- `tests/test_simulation_harness.py`: 11 scenario classes testing orchestrator end-to-end (48 tests)
+- Mocked LLM: feeds scripted evaluator responses, asserts on context construction and state transitions
+- Covers: happy path, misconceptions, scaffolding dynamics, cross-module transitions, skip override, BKT tracking, problem rotation, all 18 nodes context completeness
+- Bug fix applied: GUIDED_PRACTICE transition now routes `major_error`/`incomplete` to scaffolding increase before checking `absent` conceptual reasoning (previously `absent` check caught major errors and sent to DIAGNOSE instead)
+
 ## Development Priorities
 
 ### Immediate (Vertical Slice Validation)
@@ -136,6 +219,7 @@ python main.py --resume data/student_alice.json --debug
 - Add session analytics / learning trajectory visualization
 
 ### Future Expansion
+- Add additional modules (e.g., 2D/3D solid elements, plate/shell elements)
 - Integrate PDF class notes as a RAG knowledge source for deeper explanations
 - Integrate GitHub notebooks for computational demonstrations
 - Add multi-session memory and longitudinal tracking

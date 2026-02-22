@@ -234,12 +234,13 @@ class TestScaffoldingIncrease:
         assert orch.state == "MODEL"
         assert orch.scaffolding_level == 3
 
-    def test_major_error_absent_to_diagnose(self, orch):
-        """major_error + absent reasoning → DIAGNOSE (probes for reasoning)."""
+    def test_major_error_absent_increases_scaffolding(self, orch):
+        """major_error + absent reasoning → increase scaffolding (student clearly lost)."""
         orch.state = "GUIDED_PRACTICE"
         orch.scaffolding_level = 2
         orch.process_evaluation(eval_major_error())
-        assert orch.state == "DIAGNOSE"
+        assert orch.state == "GUIDED_PRACTICE"
+        assert orch.scaffolding_level == 3
 
     def test_minor_error_deep_stays_in_practice(self, orch):
         """minor_error + deep reasoning → stay in GP at same level."""
@@ -797,10 +798,10 @@ class TestDiagnoseLoopBreaker:
 
 
 # ===========================================================================
-# Full 6-node progression
+# Full curriculum progression
 # ===========================================================================
 
-NODE_ORDER = [
+MODULE1_NODES = [
     "element_stiffness",
     "local_global_dofs",
     "assembly",
@@ -809,50 +810,61 @@ NODE_ORDER = [
     "verification",
 ]
 
+MODULE2_NODES = [
+    "bar_element",
+    "two_d_dofs",
+    "coordinate_transformation",
+    "global_element_stiffness",
+    "truss_assembly_solution",
+    "truss_force_recovery",
+]
 
-class TestFullSixNodeProgression:
-    def test_strong_student_advances_through_all_nodes(self, orch):
-        """Simulate a strong student advancing through all 6 nodes in sequence.
-        At each node the student gives correct+deep+physical+high evals until
-        ADVANCE, then advance_to_next_node() is called."""
+MODULE3_NODES = [
+    "beam_element",
+    "frame_element",
+    "frame_transformation",
+    "frame_global_stiffness",
+    "frame_assembly_solution",
+    "frame_force_recovery",
+]
+
+ALL_NODES = MODULE1_NODES + MODULE2_NODES + MODULE3_NODES
+
+
+class TestFullModule1Progression:
+    def test_strong_student_advances_through_module1(self, orch):
+        """Simulate a strong student advancing through all 6 Module 1 nodes."""
         visited = [orch.current_node]
 
-        for node_name in NODE_ORDER:
+        for node_name in MODULE1_NODES:
             assert orch.current_node == node_name
             assert orch.state == "ASSESS_PRIOR"
 
-            # Turn 1: ASSESS_PRIOR deep → ASSESS_MASTERY
             orch.process_evaluation(eval_deep())
             assert orch.state == "ASSESS_MASTERY"
 
-            # Turn 2: ASSESS_MASTERY deep → ADVANCE (BKT crosses 0.90)
             orch.process_evaluation(eval_deep())
             assert orch.state == "ADVANCE"
 
-            # Advance to next node (or finish)
             has_next = orch.advance_to_next_node()
-            if node_name != "verification":
-                assert has_next is True
-                visited.append(orch.current_node)
-            else:
-                assert has_next is False
+            assert has_next is True  # Module 2 follows
+            visited.append(orch.current_node)
 
-        assert visited == NODE_ORDER
+        assert visited == MODULE1_NODES + ["bar_element"]
 
 
 class TestCurriculumCompletion:
     def test_no_advance_after_last_node(self, orch):
-        """After mastering verification, advance_to_next_node returns False
-        and the student stays on verification."""
-        orch.student["current_node"] = "verification"
+        """After mastering frame_force_recovery, advance_to_next_node returns False."""
+        orch.student["current_node"] = "frame_force_recovery"
         orch.state = "ADVANCE"
         result = orch.advance_to_next_node()
         assert result is False
-        assert orch.current_node == "verification"
+        assert orch.current_node == "frame_force_recovery"
 
     def test_state_unchanged_after_failed_advance(self, orch):
         """advance_to_next_node returning False does not change state."""
-        orch.student["current_node"] = "verification"
+        orch.student["current_node"] = "frame_force_recovery"
         orch.state = "ADVANCE"
         orch.advance_to_next_node()
         assert orch.state == "ADVANCE"
@@ -860,7 +872,7 @@ class TestCurriculumCompletion:
 
 class TestProblemMapCompleteness:
     def test_all_nodes_in_problem_map(self, orch):
-        """PROBLEM_MAP has entries for all 6 node IDs in the curriculum graph."""
+        """PROBLEM_MAP has entries for all 18 node IDs in the curriculum graph."""
         curriculum_nodes = list(orch.curriculum["nodes"].keys())
         for node_id in curriculum_nodes:
             assert node_id in PROBLEM_MAP, f"Missing PROBLEM_MAP entry for {node_id}"
@@ -872,10 +884,10 @@ class TestProblemMapCompleteness:
             for state in required_states:
                 assert state in mapping, f"{node_id} missing {state} in PROBLEM_MAP"
 
-    def test_problem_map_covers_exactly_six_nodes(self):
-        """PROBLEM_MAP has exactly 6 entries, one per curriculum node."""
-        assert len(PROBLEM_MAP) == 6
-        assert set(PROBLEM_MAP.keys()) == set(NODE_ORDER)
+    def test_problem_map_covers_all_nodes(self):
+        """PROBLEM_MAP has exactly 18 entries, one per curriculum node."""
+        assert len(PROBLEM_MAP) == 18
+        assert set(PROBLEM_MAP.keys()) == set(ALL_NODES)
 
 
 # ===========================================================================
@@ -997,3 +1009,150 @@ class TestRemediateLoopBreaker:
                 states.append(f"REM→{orch.state}")
 
         assert "MODEL" in states, f"Loop did not break: {states}"
+
+
+# ===========================================================================
+# Full curriculum progression (all modules)
+# ===========================================================================
+
+class TestFullEighteenNodeProgression:
+    def test_strong_student_advances_through_all_nodes(self, orch):
+        """Simulate a strong student advancing through all 18 nodes in sequence,
+        including Module 1→2 (verification→bar_element) and Module 2→3
+        (truss_force_recovery→beam_element) bridges."""
+        visited = [orch.current_node]
+
+        for node_name in ALL_NODES:
+            assert orch.current_node == node_name
+            assert orch.state == "ASSESS_PRIOR"
+
+            # Turn 1: ASSESS_PRIOR deep → ASSESS_MASTERY
+            orch.process_evaluation(eval_deep())
+            assert orch.state == "ASSESS_MASTERY"
+
+            # Turn 2: ASSESS_MASTERY deep → ADVANCE (BKT crosses 0.90)
+            orch.process_evaluation(eval_deep())
+            assert orch.state == "ADVANCE"
+
+            # Advance to next node (or finish)
+            has_next = orch.advance_to_next_node()
+            if node_name != "frame_force_recovery":
+                assert has_next is True
+                visited.append(orch.current_node)
+            else:
+                assert has_next is False
+
+        assert visited == ALL_NODES
+
+    def test_module1_to_module2_bridge(self, orch):
+        """The Module 1 → Module 2 transition (verification → bar_element) works."""
+        orch.student["current_node"] = "verification"
+        orch.state = "ADVANCE"
+        result = orch.advance_to_next_node()
+        assert result is True
+        assert orch.current_node == "bar_element"
+        assert orch.state == "ASSESS_PRIOR"
+        assert orch.scaffolding_level == 3
+
+    def test_module2_to_module3_bridge(self, orch):
+        """The Module 2 → Module 3 transition (truss_force_recovery → beam_element) works."""
+        orch.student["current_node"] = "truss_force_recovery"
+        orch.state = "ADVANCE"
+        result = orch.advance_to_next_node()
+        assert result is True
+        assert orch.current_node == "beam_element"
+        assert orch.state == "ASSESS_PRIOR"
+        assert orch.scaffolding_level == 3
+
+
+class TestModule1ToModule2Transition:
+    def test_edge_exists_verification_to_bar_element(self, orch):
+        """The curriculum graph has an edge from verification to bar_element."""
+        assert ["verification", "bar_element"] in orch.curriculum["edges"]
+
+    def test_advance_from_verification_to_bar_element(self, orch):
+        """advance_to_next_node correctly transitions from verification to bar_element."""
+        orch.student["current_node"] = "verification"
+        orch.state = "ADVANCE"
+        result = orch.advance_to_next_node()
+        assert result is True
+        assert orch.current_node == "bar_element"
+        assert orch.state == "ASSESS_PRIOR"
+        assert orch.scaffolding_level == 3
+
+
+# ===========================================================================
+# Module 3 — Frame Elements
+# ===========================================================================
+
+class TestModule3CurriculumCompletion:
+    def test_module3_nodes_reachable(self, orch):
+        """Starting from beam_element, all 6 Module 3 nodes can be reached
+        by advancing through the sequence."""
+        orch.student["current_node"] = "beam_element"
+        orch.state = "ASSESS_PRIOR"
+        visited = []
+
+        for node_name in MODULE3_NODES:
+            assert orch.current_node == node_name
+            visited.append(orch.current_node)
+
+            orch.process_evaluation(eval_deep())
+            orch.process_evaluation(eval_deep())
+            assert orch.state == "ADVANCE"
+
+            has_next = orch.advance_to_next_node()
+            if node_name != "frame_force_recovery":
+                assert has_next is True
+            else:
+                assert has_next is False
+
+        assert visited == MODULE3_NODES
+
+    def test_each_module3_node_has_three_problems(self, orch):
+        """Each Module 3 node has exactly 3 problems in the problem bank."""
+        for node_id in MODULE3_NODES:
+            problems = [p for p in orch.problem_bank.values()
+                        if p.get("node") == node_id]
+            assert len(problems) == 3, f"{node_id} has {len(problems)} problems, expected 3"
+
+
+class TestModule3ProblemMapCompleteness:
+    def test_all_module3_nodes_in_problem_map(self, orch):
+        """Every Module 3 node in the graph has a PROBLEM_MAP entry."""
+        for node_id in MODULE3_NODES:
+            assert node_id in PROBLEM_MAP, f"Missing PROBLEM_MAP entry for {node_id}"
+
+    def test_module3_required_states(self, orch):
+        """Each Module 3 node has all 5 required state keys."""
+        required_states = {"MODEL", "GUIDED_PRACTICE", "DIAGNOSE", "REMEDIATE", "ASSESS_MASTERY"}
+        for node_id in MODULE3_NODES:
+            mapping = PROBLEM_MAP[node_id]
+            for state in required_states:
+                assert state in mapping, f"{node_id} missing {state} in PROBLEM_MAP"
+
+    def test_module3_problems_exist_in_bank(self, orch):
+        """Every problem listed in PROBLEM_MAP for Module 3 nodes exists in the bank."""
+        for node_id in MODULE3_NODES:
+            mapping = PROBLEM_MAP[node_id]
+            for state, ref in mapping.items():
+                ids = ref if isinstance(ref, list) else [ref]
+                for pid in ids:
+                    assert pid in orch.problem_bank, \
+                        f"{node_id}/{state}: problem {pid} not found in bank"
+
+
+class TestModule2ToModule3Transition:
+    def test_edge_exists_truss_to_beam(self, orch):
+        """The curriculum graph has an edge from truss_force_recovery to beam_element."""
+        assert ["truss_force_recovery", "beam_element"] in orch.curriculum["edges"]
+
+    def test_advance_from_truss_to_beam(self, orch):
+        """advance_to_next_node correctly transitions from truss_force_recovery to beam_element."""
+        orch.student["current_node"] = "truss_force_recovery"
+        orch.state = "ADVANCE"
+        result = orch.advance_to_next_node()
+        assert result is True
+        assert orch.current_node == "beam_element"
+        assert orch.state == "ASSESS_PRIOR"
+        assert orch.scaffolding_level == 3

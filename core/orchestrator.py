@@ -20,6 +20,8 @@ import json
 import copy
 from pathlib import Path
 from core.bkt import update_mastery, check_mastery
+from core.notebook_knowledge import NotebookKnowledge
+from core.notebook_executor import NotebookExecutor, NODE_TO_DEMOS
 
 
 # Valid states
@@ -78,6 +80,102 @@ PROBLEM_MAP = {
         "REMEDIATE": "VER_A",
         "ASSESS_MASTERY": "VER_C",
     },
+    "bar_element": {
+        "MODEL": "BAR_A",
+        "GUIDED_PRACTICE": ["BAR_A", "BAR_B"],
+        "DIAGNOSE": "BAR_B",
+        "REMEDIATE": "BAR_A",
+        "ASSESS_MASTERY": "BAR_C",
+    },
+    "two_d_dofs": {
+        "MODEL": "TDOF_A",
+        "GUIDED_PRACTICE": ["TDOF_A", "TDOF_B"],
+        "DIAGNOSE": "TDOF_B",
+        "REMEDIATE": "TDOF_A",
+        "ASSESS_MASTERY": "TDOF_C",
+    },
+    "coordinate_transformation": {
+        "MODEL": "CT_A",
+        "GUIDED_PRACTICE": ["CT_A", "CT_B"],
+        "DIAGNOSE": "CT_B",
+        "REMEDIATE": "CT_A",
+        "ASSESS_MASTERY": "CT_C",
+    },
+    "global_element_stiffness": {
+        "MODEL": "GES_A",
+        "GUIDED_PRACTICE": ["GES_A", "GES_B"],
+        "DIAGNOSE": "GES_B",
+        "REMEDIATE": "GES_A",
+        "ASSESS_MASTERY": "GES_C",
+    },
+    "truss_assembly_solution": {
+        "MODEL": "TAS_A",
+        "GUIDED_PRACTICE": ["TAS_A", "TAS_B"],
+        "DIAGNOSE": "TAS_B",
+        "REMEDIATE": "TAS_A",
+        "ASSESS_MASTERY": "TAS_C",
+    },
+    "truss_force_recovery": {
+        "MODEL": "TFR_A",
+        "GUIDED_PRACTICE": ["TFR_A", "TFR_B"],
+        "DIAGNOSE": "TFR_B",
+        "REMEDIATE": "TFR_A",
+        "ASSESS_MASTERY": "TFR_C",
+    },
+    "beam_element": {
+        "MODEL": "BEAM_A",
+        "GUIDED_PRACTICE": ["BEAM_A", "BEAM_B"],
+        "DIAGNOSE": "BEAM_B",
+        "REMEDIATE": "BEAM_A",
+        "ASSESS_MASTERY": "BEAM_C",
+    },
+    "frame_element": {
+        "MODEL": "FRAME_A",
+        "GUIDED_PRACTICE": ["FRAME_A", "FRAME_B"],
+        "DIAGNOSE": "FRAME_B",
+        "REMEDIATE": "FRAME_A",
+        "ASSESS_MASTERY": "FRAME_C",
+    },
+    "frame_transformation": {
+        "MODEL": "FT_A",
+        "GUIDED_PRACTICE": ["FT_A", "FT_B"],
+        "DIAGNOSE": "FT_B",
+        "REMEDIATE": "FT_A",
+        "ASSESS_MASTERY": "FT_C",
+    },
+    "frame_global_stiffness": {
+        "MODEL": "FGS_A",
+        "GUIDED_PRACTICE": ["FGS_A", "FGS_B"],
+        "DIAGNOSE": "FGS_B",
+        "REMEDIATE": "FGS_A",
+        "ASSESS_MASTERY": "FGS_C",
+    },
+    "frame_assembly_solution": {
+        "MODEL": "FAS_A",
+        "GUIDED_PRACTICE": ["FAS_A", "FAS_B"],
+        "DIAGNOSE": "FAS_B",
+        "REMEDIATE": "FAS_A",
+        "ASSESS_MASTERY": "FAS_C",
+    },
+    "frame_force_recovery": {
+        "MODEL": "FFR_A",
+        "GUIDED_PRACTICE": ["FFR_A", "FFR_B"],
+        "DIAGNOSE": "FFR_B",
+        "REMEDIATE": "FFR_A",
+        "ASSESS_MASTERY": "FFR_C",
+    },
+}
+
+
+# Mapping from curriculum nodes to spring-agent example names.
+# Module 1 only — the spring-agent only handles 1D spring-particle systems.
+NODE_TO_EXAMPLE = {
+    "element_stiffness": "single_spring_k100",
+    "local_global_dofs": "three_spring_series",
+    "assembly": "three_spring_series",
+    "boundary_conditions": "three_spring_series",
+    "solution": "nb01_main_example",
+    "verification": "nb01_main_example",
 }
 
 
@@ -87,7 +185,8 @@ class Orchestrator:
     construction for the teacher and evaluator agents.
     """
 
-    def __init__(self, data_dir: str = "data", student_file: str = None):
+    def __init__(self, data_dir: str = "data", student_file: str = None,
+                 on_transition=None):
         self.data_dir = Path(data_dir)
 
         # Load curriculum graph
@@ -109,6 +208,18 @@ class Orchestrator:
         self.student_file = student_file or "data/student_state.json"
         self._pending_evaluation = False
         self._skipped_to_mastery = False
+
+        # Notebook knowledge layer
+        self.nb_knowledge = NotebookKnowledge(data_dir)
+
+        # Spring-agent bridge (lazy init)
+        self._bridge = None
+
+        # Notebook code executor (lazy init)
+        self._executor = None
+
+        # Persistence callback — called after every state transition
+        self._on_transition = on_transition
 
     @property
     def state(self) -> str:
@@ -138,6 +249,24 @@ class Orchestrator:
     @scaffolding_level.setter
     def scaffolding_level(self, level: int):
         self.student["scaffolding_level"] = max(0, min(3, level))
+
+    @property
+    def solver_bridge(self):
+        """Lazy-init the spring-agent bridge. Returns None if unavailable."""
+        if self._bridge is None:
+            try:
+                from core.spring_agent_bridge import SpringAgentBridge
+                self._bridge = SpringAgentBridge()
+            except (FileNotFoundError, ImportError):
+                pass  # spring-agent not available — tutor works without it
+        return self._bridge
+
+    @property
+    def code_executor(self) -> NotebookExecutor:
+        """Lazy-init the notebook code executor."""
+        if self._executor is None:
+            self._executor = NotebookExecutor()
+        return self._executor
 
     def needs_evaluation(self) -> bool:
         """Whether the current state requires calling the evaluator."""
@@ -202,8 +331,17 @@ class Orchestrator:
             "transparency": True,  # Agent should be transparent about assessment
         }
 
+        # Notebook knowledge layer
+        context["notebook_references"] = self.nb_knowledge.get_references_for_node(
+            self.current_node
+        )
+        context["curriculum_difference"] = self.nb_knowledge.get_curriculum_difference_note(
+            self.current_node
+        )
+
         # When advancing, include the next node's title for the transition prompt
         if self.state == "ADVANCE":
+            context["evolution_table"] = self.nb_knowledge.get_evolution_table()
             for source, target in self.curriculum["edges"]:
                 if source == self.current_node:
                     context["next_node_title"] = self.curriculum["nodes"][target]["title"]
@@ -254,6 +392,47 @@ class Orchestrator:
                     context["practice_problem"] = {
                         "statement": gp_problem["statement"],
                         "scaffolded_prompt": gp_problem["scaffolded_versions"].get(level_key, ""),
+                    }
+
+        # Spring-agent solver demo (Module 1 only)
+        bridge = self.solver_bridge
+        if bridge and self.state == "MODEL":
+            example_name = NODE_TO_EXAMPLE.get(self.current_node)
+            if example_name:
+                solver_result = bridge.solve_example(example_name)
+                if solver_result.get("status") == "success":
+                    context["solver_demo"] = solver_result
+
+        # Notebook code executor demos (all modules)
+        if self.state == "MODEL":
+            demos = self.code_executor.get_demos_for_node(self.current_node)
+            if demos:
+                module_map = {
+                    "module1_springs": [
+                        "element_stiffness", "local_global_dofs", "assembly",
+                        "boundary_conditions", "solution", "verification",
+                    ],
+                    "module2_trusses": [
+                        "bar_element", "two_d_dofs", "coordinate_transformation",
+                        "global_element_stiffness", "truss_assembly_solution",
+                        "truss_force_recovery",
+                    ],
+                    "module3_frames": [
+                        "beam_element", "frame_element", "frame_transformation",
+                        "frame_global_stiffness", "frame_assembly_solution",
+                        "frame_force_recovery",
+                    ],
+                }
+                for mod, nodes in module_map.items():
+                    if self.current_node in nodes:
+                        self.code_executor.set_module(mod)
+                        break
+
+                demo_results = self.code_executor.run_demo(demos[0])
+                if demo_results and all(s["result"]["success"] for s in demo_results):
+                    context["code_demo"] = {
+                        "demo_name": demos[0],
+                        "steps": demo_results,
                     }
 
         return context
@@ -347,6 +526,10 @@ class Orchestrator:
         # --- State transition logic (conservative policy) ---
         self._transition(evaluation)
 
+        # Auto-save callback
+        if self._on_transition:
+            self._on_transition()
+
     def _transition(self, evaluation: dict) -> None:
         """Determine the next state based on evaluation results."""
         procedural = evaluation.get("procedural", "incomplete")
@@ -395,8 +578,16 @@ class Orchestrator:
             elif procedural == "minor_error" and conceptual == "deep":
                 # Good understanding, small mistake — try again same level
                 self.state = "GUIDED_PRACTICE"
+            elif procedural in ["major_error", "incomplete"]:
+                # Major error or incomplete — increase scaffolding
+                if self.scaffolding_level < 3:
+                    self.scaffolding_level += 1
+                    self.state = "GUIDED_PRACTICE"
+                else:
+                    # Already at max scaffolding — go back to modeling
+                    self.state = "MODEL"
             elif conceptual == "absent":
-                # No reasoning provided — must probe
+                # Correct answer but no reasoning provided — must probe
                 self.state = "DIAGNOSE"
             else:
                 # Major error or confusion — increase scaffolding
@@ -533,10 +724,65 @@ class Orchestrator:
             # Let the teacher handle the question, then return to current state
             pass  # No state change
 
+    def verify_student_code(self, student_code: str, expected: dict) -> dict:
+        """Run student code through the executor and check results.
+
+        Parameters
+        ----------
+        student_code : str
+            Student's Python code.
+        expected : dict
+            Mapping of expression → expected value.
+
+        Returns
+        -------
+        dict with: success, all_correct, checks
+        """
+        module_map = {
+            "module1_springs": [
+                "element_stiffness", "local_global_dofs", "assembly",
+                "boundary_conditions", "solution", "verification",
+            ],
+            "module2_trusses": [
+                "bar_element", "two_d_dofs", "coordinate_transformation",
+                "global_element_stiffness", "truss_assembly_solution",
+                "truss_force_recovery",
+            ],
+            "module3_frames": [
+                "beam_element", "frame_element", "frame_transformation",
+                "frame_global_stiffness", "frame_assembly_solution",
+                "frame_force_recovery",
+            ],
+        }
+        for mod, nodes in module_map.items():
+            if self.current_node in nodes:
+                self.code_executor.set_module(mod)
+                break
+
+        return self.code_executor.verify_output(student_code, expected)
+
     def save_student_model(self) -> None:
         """Persist the student model to disk."""
         with open(self.student_file, "w") as f:
             json.dump(self.student, f, indent=2)
+
+    def handle_exploration_turn(self, student_message: str) -> dict:
+        """Process a student message during EXPLORATION mode.
+
+        The student interacts with the solver via natural language.
+        The teacher translates intent to tool calls and coaches.
+        Returns available capabilities for the teacher context.
+        """
+        bridge = self.solver_bridge
+        if bridge is None:
+            return {"mode": "exploration", "available": False}
+        return {
+            "mode": "exploration",
+            "available": True,
+            "available_tools": bridge.get_available_tools(),
+            "has_model": bridge.has_model,
+            "has_results": bridge.has_results,
+        }
 
     def get_status_summary(self) -> str:
         """Human-readable summary of current status for debugging."""

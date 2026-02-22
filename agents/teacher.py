@@ -243,6 +243,140 @@ def build_teacher_prompt(context: dict) -> tuple[str, str]:
             system_prompt += f"  Content: {step['content']}\n"
             system_prompt += f"  Physical reasoning: {step['physical_reasoning']}\n"
 
+    # Solver demo results (spring-agent, Module 1 only)
+    solver_demo = context.get("solver_demo")
+    if solver_demo:
+        summary = solver_demo.get("model_summary", {})
+        results = solver_demo.get("results", {})
+        system_prompt += "\n## Live Solver Results\n"
+        system_prompt += (
+            "You have solver results for this demonstration. "
+            "Use them to reinforce your explanation.\n"
+        )
+        system_prompt += (
+            f"Model: {summary.get('name', 'unknown')} "
+            f"({summary.get('num_nodes', '?')} nodes, "
+            f"{summary.get('num_elements', '?')} elements)\n"
+        )
+        system_prompt += f"Displacements: {results.get('displacements', {})}\n"
+        system_prompt += f"Element forces: {results.get('element_forces', {})}\n"
+        system_prompt += f"Reactions: {results.get('reaction_forces', {})}\n"
+        neq = results.get("neq", "?")
+        system_prompt += f"Stiffness matrix size: {neq}x{neq}\n"
+        system_prompt += (
+            "\nShow the student these computed values alongside your analytical "
+            "derivation. Say something like: \"Let me verify our hand calculation "
+            "with the solver\" and compare the numerical results to the derived "
+            "expressions.\n"
+        )
+
+    # Solver verification results (for GUIDED_PRACTICE / ASSESS_MASTERY)
+    solver_verification = context.get("solver_verification")
+    if solver_verification:
+        system_prompt += "\n## Answer Verification\n"
+        system_prompt += (
+            f"The solver computed: {solver_verification.get('expected')}\n"
+            f"Student answered: {solver_verification.get('student')}\n"
+        )
+        if solver_verification.get("correct"):
+            system_prompt += (
+                f"The answer is CORRECT (error: "
+                f"{solver_verification.get('error_pct', 0):.1f}%).\n"
+            )
+        else:
+            system_prompt += (
+                f"The answer is INCORRECT. "
+                f"Absolute error: {solver_verification.get('abs_error')}.\n"
+                "Diagnose the likely source of error: if error_pct ~ 100% it is "
+                "a possible sign error; if it is a round multiple then possibly "
+                "the wrong equation or stiffness; if error < 5% it is likely "
+                "rounding and acceptable but note it.\n"
+            )
+
+    # Notebook knowledge references
+    nb_refs = context.get("notebook_references", [])
+    if nb_refs:
+        system_prompt += "\n## Reference Code from Course Notebooks\n"
+        for ref in nb_refs:
+            family = ref.get("function_family", "")
+            module = ref.get("module", "")
+            system_prompt += f"\n### {family} — {module}\n"
+            code = ref.get("code", "")
+            if code:
+                system_prompt += f"```\n{code}\n```\n"
+            narration = ref.get("expert_narration", "")
+            if narration:
+                system_prompt += f"\nExpert narration: {narration}\n"
+            notices = ref.get("what_student_should_notice", [])
+            if notices:
+                system_prompt += "\nThings the student should notice:\n"
+                for item in notices:
+                    system_prompt += f"- {item}\n"
+            questions = ref.get("questions_the_tutor_can_ask", [])
+            if questions:
+                system_prompt += "\nQuestions you can ask:\n"
+                for q in questions:
+                    system_prompt += f"- {q}\n"
+
+    curriculum_diff = context.get("curriculum_difference")
+    if curriculum_diff:
+        system_prompt += (
+            f"\nIMPORTANT: The notebook code differs from the curriculum approach: "
+            f"{curriculum_diff}\n"
+        )
+
+    # Live code demonstration (from notebook executor)
+    code_demo = context.get("code_demo")
+    if code_demo:
+        system_prompt += "\n## Live Code Demonstration\n"
+        system_prompt += (
+            "You have results from running actual notebook code. Present each step "
+            "to the student:\n"
+        )
+        for step in code_demo.get("steps", []):
+            system_prompt += f"\nStep {step['step']}: {step['narration']}\n"
+            system_prompt += f"```python\n{step['code']}\n```\n"
+            stdout = step.get("result", {}).get("stdout", "")
+            if stdout:
+                system_prompt += f"Output:\n```\n{stdout}\n```\n"
+        system_prompt += (
+            "\nWalk the student through each step. After the demo, ask them to "
+            "predict what would happen if a parameter changed (e.g., \"What if we "
+            "doubled the stiffness?\").\n"
+        )
+
+    # Returning student welcome-back context
+    if context.get("is_returning_student"):
+        resume = context.get("resume_summary", {})
+        progress = resume.get("progress", {})
+        system_prompt += "\n## Returning Student\n"
+        system_prompt += (
+            f"This student is back for session #{resume.get('session_count', '?')}.\n"
+            f"Last session: {resume.get('last_session', 'unknown')}\n"
+            f"Progress: {progress.get('mastered', 0)}/{progress.get('total', '?')} nodes mastered.\n"
+            f"Current topic: {resume.get('current_node_title', 'unknown')}\n"
+        )
+        if context.get("recap_needed"):
+            system_prompt += (
+                f"\n{context.get('recap_hint', '')}\n"
+                "Start with a brief recap of where they left off before continuing.\n"
+            )
+        else:
+            system_prompt += (
+                "\nWelcome them back and proceed with the current topic.\n"
+            )
+
+    # Cross-module evolution table (for ADVANCE state)
+    evolution_table = context.get("evolution_table")
+    if evolution_table and evolution_table.get("rows"):
+        system_prompt += "\n## Cross-Module Evolution Table\n"
+        system_prompt += f"{evolution_table.get('description', '')}\n"
+        cols = evolution_table.get("columns", [])
+        if cols:
+            system_prompt += " | ".join(cols) + "\n"
+        for row in evolution_table.get("rows", []):
+            system_prompt += " | ".join(str(c) for c in row) + "\n"
+
     return system_prompt, ""
 
 

@@ -1,0 +1,173 @@
+{
+  "metadata": {
+    "description": "Maps notebook functions to curriculum nodes. Each function appears in 1-3 notebooks with increasing DOF complexity. The tutor uses this map to find the right code reference for the current module and node.",
+    "notebooks": {
+      "nb01": {"file": "nb01_springs.ipynb", "module": "module1_springs", "dofs_per_node": 1},
+      "nb02": {"file": "nb02_truss_elements.ipynb", "module": "module2_trusses", "dofs_per_node": 2},
+      "nb03": {"file": "nb03_frame_elements.ipynb", "module": "module3_frames", "dofs_per_node": 3}
+    }
+  },
+
+  "function_families": {
+    "uelXXX": {
+      "description": "Element stiffness matrix computation. The core function that defines each element type.",
+      "variants": {
+        "nb01": {
+          "function_name": "uelspring",
+          "signature": "uelspring(kcof)",
+          "returns": "kl (2×2)",
+          "curriculum_nodes": ["element_stiffness"],
+          "pedagogical_role": ["MODEL: show the simplest stiffness matrix", "GUIDED_PRACTICE: student compares their hand-derived K to this code", "COACHING: verify student's numerical answers"]
+        },
+        "nb02": {
+          "function_name": "ueltruss2D",
+          "signature": "ueltruss2D(coord, A, Emod)",
+          "returns": "kG (4×4, already in global coords)",
+          "curriculum_nodes": ["bar_element", "coordinate_transformation", "global_element_stiffness"],
+          "pedagogical_role": ["MODEL: show how K_local, Q (transformation), and K_global are computed in one function", "COACHING: student traces through the code to identify where K_local ends and transformation begins", "ARTICULATION: ask student to explain each line"],
+          "note": "This function combines local K, builds Q, and transforms in one shot — the tutor should decompose it into the 3 separate curriculum steps"
+        },
+        "nb03": {
+          "function_name": "uelbeam2DU",
+          "signature": "uelbeam2DU(coord, I, Emod)",
+          "returns": "kG (6×6, already in global coords)",
+          "curriculum_nodes": ["beam_element", "frame_element", "frame_transformation", "frame_global_stiffness"],
+          "pedagogical_role": ["MODEL: show the full frame pipeline (K_local → Q → K_global)", "COACHING: student identifies the 4×4 beam K inside the code", "ARTICULATION: ask why Q has the specific structure it does"],
+          "note": "Frame notebook uses beam WITHOUT axial DOFs (4×4 local, 6×6 global via Q). This differs from our curriculum which builds the full 6×6 frame element. The tutor should note this difference explicitly."
+        }
+      },
+      "cross_module_narrative": "The element function evolves: uelspring builds a 2×2 directly. ueltruss2D builds a 2×2 local, constructs Q, transforms to 4×4 global. uelbeam2DU builds a 4×4 beam local, constructs Q, transforms to 6×6 global. The pattern is always: local K → transformation → global K. Only the sizes grow."
+    },
+
+    "eqcounter": {
+      "description": "Reads boundary condition flags from node data and assigns equation numbers to free DOFs. This IS the IBC array construction.",
+      "variants": {
+        "nb01": {
+          "function_name": "eqcounter",
+          "signature": "eqcounter(nodes)",
+          "returns": "neq, IBC (nn×1)",
+          "curriculum_nodes": ["boundary_conditions"],
+          "pedagogical_role": ["MODEL: show how -1 flags become the IBC array", "COACHING: student traces through for a specific example"]
+        },
+        "nb02": {
+          "function_name": "eqcounter",
+          "signature": "eqcounter(nodes)",
+          "returns": "neq, IBC (nn×2)",
+          "curriculum_nodes": ["truss_assembly_solution"],
+          "pedagogical_role": ["MODEL: show the 2-DOF generalization", "ARTICULATION: ask student what changed from the spring version and why"]
+        },
+        "nb03": {
+          "function_name": "eqcounter",
+          "signature": "eqcounter(nodes)",
+          "returns": "neq, IBC (nn×3)",
+          "curriculum_nodes": ["frame_assembly_solution"],
+          "pedagogical_role": ["MODEL: show the 3-DOF generalization", "REFLECTION: student compares all 3 versions side-by-side"]
+        }
+      },
+      "cross_module_narrative": "eqcounter scales from 1 to 2 to 3 columns — one per DOF. The logic is identical: scan for 0 (free) vs -1 (restrained), assign sequential equation numbers to free DOFs. This is the IBC array the curriculum teaches. The student should recognize that the SAME algorithm handles springs, trusses, and frames — only the number of DOFs per node changes."
+    },
+
+    "DME": {
+      "description": "Builds the assembly operator — maps element local DOFs to global equation numbers using the IBC array and element connectivity.",
+      "variants": {
+        "nb01": {
+          "function_name": "DME",
+          "signature": "DME(nodes, elements)",
+          "returns": "DME (nels×2), IBC, neq",
+          "curriculum_nodes": ["local_global_dofs", "assembly"],
+          "pedagogical_role": ["MODEL: show the connectivity mapping from local to global", "COACHING: student builds DME by hand then compares to code output"]
+        },
+        "nb02": {
+          "function_name": "DME",
+          "signature": "DME(nodes, elements)",
+          "returns": "DME (nels×4), IBC, neq",
+          "curriculum_nodes": ["two_d_dofs", "truss_assembly_solution"],
+          "pedagogical_role": ["MODEL: show 4-DOF per element mapping", "ARTICULATION: ask student to explain the inner loop over 2 DOFs per node"]
+        },
+        "nb03": {
+          "function_name": "DME",
+          "signature": "DME(nodes, elements)",
+          "returns": "DME (nels×6), IBC, neq",
+          "curriculum_nodes": ["frame_assembly_solution"],
+          "pedagogical_role": ["MODEL: show 6-DOF per element mapping", "REFLECTION: compare all 3 DME implementations"]
+        }
+      },
+      "cross_module_narrative": "DME grows from nels×2 to nels×4 to nels×6 — the number of columns equals the element DOFs. The inner loop iterates over DOFs per node (1, 2, or 3). This is the concrete implementation of the local-to-global DOF mapping the curriculum teaches. The pattern is: for each element, for each node, for each DOF at that node, look up the equation number in IBC."
+    },
+
+    "assembly": {
+      "description": "Assembles the global stiffness matrix by scattering each element's K_global into the right positions using the DME operator.",
+      "variants": {
+        "nb01": {
+          "function_name": "assembly",
+          "signature": "assembly(elements, mats, nodes, neq, DME)",
+          "returns": "KG (neq×neq)",
+          "curriculum_nodes": ["assembly"],
+          "pedagogical_role": ["MODEL: show the scatter-add loop", "COACHING: student traces through assembly of a 2-spring system", "ARTICULATION: ask why the if glob_row != -1 check is needed"]
+        },
+        "nb02": {
+          "function_name": "assembly",
+          "signature": "assembly(elements, mats, nodes, neq, DME)",
+          "returns": "KG (neq×neq)",
+          "curriculum_nodes": ["truss_assembly_solution"],
+          "pedagogical_role": ["MODEL: same scatter-add with 4×4 element matrices", "REFLECTION: compare to spring assembly — what changed?"]
+        },
+        "nb03": {
+          "function_name": "assembly",
+          "signature": "assembly(elements, mats, nodes, neq, DME)",
+          "returns": "KG (neq×neq)",
+          "curriculum_nodes": ["frame_assembly_solution"],
+          "pedagogical_role": ["MODEL: same scatter-add with 6×6 element matrices", "REFLECTION: the assembly code is nearly identical across all 3 modules"]
+        }
+      },
+      "cross_module_narrative": "The assembly function is IDENTICAL in structure across all 3 notebooks. Only ndof changes (2→4→6). This is the key pedagogical point: assembly is a GENERIC operation. The same double loop (over element rows, over element columns, skip if -1) works for any element type. The student should see that once they understand spring assembly, they understand ALL assembly."
+    },
+
+    "loadasem": {
+      "description": "Assembles the global load vector from applied nodal loads using the IBC array.",
+      "variants": {
+        "nb01": {
+          "function_name": "loadasem",
+          "signature": "loadasem(loads, IBC, neq, nl)",
+          "returns": "RHSG (neq)",
+          "curriculum_nodes": ["boundary_conditions", "solution"],
+          "pedagogical_role": ["MODEL: show load placement using IBC"]
+        },
+        "nb02": {
+          "function_name": "loadasem",
+          "signature": "loadasem(loads, IBC, neq, nl)",
+          "returns": "RHSG (neq)",
+          "curriculum_nodes": ["truss_assembly_solution"],
+          "pedagogical_role": ["MODEL: 2-component loads (Fx, Fy) placed via IBC"]
+        },
+        "nb03": {
+          "function_name": "loadasem",
+          "signature": "loadasem(loads, IBC, neq, nl)",
+          "returns": "RHSG (neq)",
+          "curriculum_nodes": ["frame_assembly_solution"],
+          "pedagogical_role": ["MODEL: 3-component loads (Fx, Fy, M) placed via IBC"]
+        }
+      },
+      "cross_module_narrative": "Load assembly mirrors the DOF scaling: 1 component per node (springs), 2 (trusses), 3 (frames). The logic is: for each loaded node, look up its equation numbers in IBC, place the load components into those positions of RHSG. Skip if equation number is -1 (restrained DOF)."
+    },
+
+    "main_program": {
+      "description": "The top-level solve sequence. Identical structure across all 3 notebooks.",
+      "variants": {
+        "nb01": {
+          "code": "nodes, mats, elements, loads = readin()\nDME, IBC, neq = DME(nodes, elements)\nKG = assembly(elements, mats, nodes, neq, DME)\nRHSG = loadasem(loads, IBC, neq, 3)\nUG = np.linalg.solve(KG, RHSG)\nprint(UG)",
+          "curriculum_nodes": ["solution", "verification"]
+        },
+        "nb02": {
+          "code": "nodes, mats, elements, loads = readin()\nDME, IBC, neq = DME(nodes, elements)\nKG = assembly(elements, mats, nodes, neq, DME)\nRHSG = loadasem(loads, IBC, neq, 1)\nUG = np.linalg.solve(KG, RHSG)\nprint(UG)",
+          "curriculum_nodes": ["truss_assembly_solution", "truss_force_recovery"]
+        },
+        "nb03": {
+          "code": "nodes, mats, elements, loads = readin()\nDME, IBC, neq = DME(nodes, elements)\nKG = assembly(elements, mats, nodes, neq, DME)\nRHSG = loadasem(loads, IBC, neq, 1)\nUG = np.linalg.solve(KG, RHSG)\nprint(UG)",
+          "curriculum_nodes": ["frame_assembly_solution", "frame_force_recovery"]
+        }
+      },
+      "cross_module_narrative": "The main program is character-for-character identical across all 3 notebooks (except the number of loads). This is the ultimate payoff: readin → DME → assembly → load → solve is the SAME pipeline regardless of element type. The element-specific logic is entirely encapsulated in the uelXXX function. This is the power of the direct stiffness method — the algorithm is universal."
+    }
+  }
+}

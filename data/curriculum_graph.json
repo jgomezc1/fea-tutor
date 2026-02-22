@@ -2,7 +2,10 @@
   "nodes": {
     "element_stiffness": {
       "title": "Element Stiffness Matrix",
-      "prerequisites": ["spring_behavior", "matrix_algebra"],
+      "prerequisites": [
+        "spring_behavior",
+        "matrix_algebra"
+      ],
       "learning_objectives": {
         "LO1": {
           "description": "Derive the 2x2 stiffness matrix for a single spring from equilibrium",
@@ -40,7 +43,9 @@
     },
     "local_global_dofs": {
       "title": "Local vs. Global DOFs",
-      "prerequisites": ["element_stiffness"],
+      "prerequisites": [
+        "element_stiffness"
+      ],
       "learning_objectives": {
         "LO1": {
           "description": "Identify the local and global degree of freedom numbering for a given spring system",
@@ -51,7 +56,7 @@
           "blooms_level": "apply"
         },
         "LO3": {
-          "description": "Explain why this mapping is necessary — elements don't know about the global system and the mapping is what connects them",
+          "description": "Explain why this mapping is necessary \u2014 elements don't know about the global system and the mapping is what connects them",
           "blooms_level": "understand"
         },
         "LO4": {
@@ -62,7 +67,7 @@
       "misconceptions": {
         "M1": "Thinking that local node 1 must always correspond to the lower-numbered global node",
         "M2": "Confusing DOF numbering with physical position (assuming DOF 1 is always the leftmost node)",
-        "M3": "Not understanding that the same global DOF appears in multiple element stiffness matrices — this is what creates coupling",
+        "M3": "Not understanding that the same global DOF appears in multiple element stiffness matrices \u2014 this is what creates coupling",
         "M4": "Believing the connectivity is a property of the element rather than an assignment we make"
       },
       "physical_reasoning_markers": {
@@ -81,10 +86,12 @@
     },
     "assembly": {
       "title": "Assembly",
-      "prerequisites": ["local_global_dofs"],
+      "prerequisites": [
+        "local_global_dofs"
+      ],
       "learning_objectives": {
         "LO1": {
-          "description": "Expand an element stiffness matrix from local (2x2) to global size (NxN) using the connectivity map — placing entries in the correct rows and columns",
+          "description": "Expand an element stiffness matrix from local (2x2) to global size (NxN) using the connectivity map \u2014 placing entries in the correct rows and columns",
           "blooms_level": "apply"
         },
         "LO2": {
@@ -92,7 +99,7 @@
           "blooms_level": "apply"
         },
         "LO3": {
-          "description": "Explain physically why contributions from different elements add at shared DOFs — forces from multiple springs acting on the same node superpose",
+          "description": "Explain physically why contributions from different elements add at shared DOFs \u2014 forces from multiple springs acting on the same node superpose",
           "blooms_level": "understand"
         },
         "LO4": {
@@ -102,7 +109,7 @@
       },
       "misconceptions": {
         "M1": "Thinking assembly is concatenation (block diagonal placement) rather than overlapping summation at shared DOFs",
-        "M2": "Not understanding why shared DOFs accumulate stiffness from multiple elements — treating the overlap as an error or double-counting",
+        "M2": "Not understanding why shared DOFs accumulate stiffness from multiple elements \u2014 treating the overlap as an error or double-counting",
         "M3": "Expecting the assembled global matrix to be invertible before applying boundary conditions",
         "M4": "Assembling element matrices in the wrong positions because of connectivity map errors"
       },
@@ -124,14 +131,16 @@
     },
     "boundary_conditions": {
       "title": "Boundary Conditions",
-      "prerequisites": ["assembly"],
+      "prerequisites": [
+        "assembly"
+      ],
       "learning_objectives": {
         "LO1": {
           "description": "Apply displacement boundary conditions to the global system by modifying rows and columns using the elimination approach",
           "blooms_level": "apply"
         },
         "LO2": {
-          "description": "Explain physically why the unmodified global matrix is singular and why applying BCs makes it invertible — removing rigid body modes by providing a spatial reference",
+          "description": "Explain physically why the unmodified global matrix is singular and why applying BCs makes it invertible \u2014 removing rigid body modes by providing a spatial reference",
           "blooms_level": "understand"
         },
         "LO3": {
@@ -144,10 +153,10 @@
         }
       },
       "misconceptions": {
-        "M1": "Applying boundary conditions before assembly — modifying element matrices instead of the global system",
-        "M2": "Confusing force BCs with displacement BCs — trying to impose a known force by modifying the stiffness matrix",
-        "M3": "Not understanding that the singular matrix is correct and expected before BCs — thinking the assembly went wrong",
-        "M4": "Forgetting to recover reactions — solving for displacements and stopping",
+        "M1": "Applying boundary conditions before assembly \u2014 modifying element matrices instead of the global system",
+        "M2": "Confusing force BCs with displacement BCs \u2014 trying to impose a known force by modifying the stiffness matrix",
+        "M3": "Not understanding that the singular matrix is correct and expected before BCs \u2014 thinking the assembly went wrong",
+        "M4": "Forgetting to recover reactions \u2014 solving for displacements and stopping",
         "M5": "Thinking that applying BCs 'fixes' a broken matrix rather than understanding it removes the physical rigid body freedom"
       },
       "physical_reasoning_markers": {
@@ -168,14 +177,16 @@
     },
     "solution": {
       "title": "Solution and Back-Substitution",
-      "prerequisites": ["boundary_conditions"],
+      "prerequisites": [
+        "boundary_conditions"
+      ],
       "learning_objectives": {
         "LO1": {
           "description": "Solve the reduced system of equations for the unknown displacements",
           "blooms_level": "apply"
         },
         "LO2": {
-          "description": "Back-substitute the computed displacements into the element stiffness equations to recover internal element forces — extension and spring force for each element",
+          "description": "Back-substitute the computed displacements into the element stiffness equations to recover internal element forces \u2014 extension and spring force for each element",
           "blooms_level": "apply"
         },
         "LO3": {
@@ -183,13 +194,13 @@
           "blooms_level": "apply"
         },
         "LO4": {
-          "description": "Interpret the signs of displacements, element forces, and reactions physically — direction of movement, tension vs compression, direction of support forces",
+          "description": "Interpret the signs of displacements, element forces, and reactions physically \u2014 direction of movement, tension vs compression, direction of support forces",
           "blooms_level": "analyze"
         }
       },
       "misconceptions": {
         "M1": "Stopping after solving for displacements and not recovering element forces or reactions",
-        "M2": "Confusing element forces with nodal forces — the internal force in a spring is not the same as the external force applied to a node",
+        "M2": "Confusing element forces with nodal forces \u2014 the internal force in a spring is not the same as the external force applied to a node",
         "M3": "Sign convention errors when interpreting tension vs compression",
         "M4": "Computing reactions incorrectly by using the reduced system instead of the full system",
         "M5": "Not checking whether the results make qualitative physical sense before trusting the numbers"
@@ -211,18 +222,20 @@
     },
     "verification": {
       "title": "Verification and Interpretation",
-      "prerequisites": ["solution"],
+      "prerequisites": [
+        "solution"
+      ],
       "learning_objectives": {
         "LO1": {
-          "description": "Verify global equilibrium — confirm that the sum of all external forces (applied loads plus reactions) equals zero",
+          "description": "Verify global equilibrium \u2014 confirm that the sum of all external forces (applied loads plus reactions) equals zero",
           "blooms_level": "analyze"
         },
         "LO2": {
-          "description": "Verify element-level equilibrium — confirm that every node individually satisfies force balance",
+          "description": "Verify element-level equilibrium \u2014 confirm that every node individually satisfies force balance",
           "blooms_level": "analyze"
         },
         "LO3": {
-          "description": "Predict qualitative behavior before solving and use it to catch errors — which way should nodes move, which springs should be in tension",
+          "description": "Predict qualitative behavior before solving and use it to catch errors \u2014 which way should nodes move, which springs should be in tension",
           "blooms_level": "evaluate"
         },
         "LO4": {
@@ -231,11 +244,11 @@
         }
       },
       "misconceptions": {
-        "M1": "Assuming the computed answer is always correct without verification — trusting the math blindly",
+        "M1": "Assuming the computed answer is always correct without verification \u2014 trusting the math blindly",
         "M2": "Not checking units or dimensional consistency",
-        "M3": "Not being able to predict qualitative behavior before solving — treating FEA as a black box",
+        "M3": "Not being able to predict qualitative behavior before solving \u2014 treating FEA as a black box",
         "M4": "Thinking that equilibrium checks are optional rather than a professional requirement",
-        "M5": "Confusing a verification check with a derivation — verification uses an independent path, not repetition"
+        "M5": "Confusing a verification check with a derivation \u2014 verification uses an independent path, not repetition"
       },
       "physical_reasoning_markers": {
         "positive": [
@@ -253,16 +266,618 @@
           "Cannot diagnose the source of an error when results are wrong"
         ]
       }
+    },
+    "bar_element": {
+      "title": "From Spring to Bar Element",
+      "module": "truss_elements",
+      "prerequisites": [
+        "verification"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Derive k = EA/L from the simple stiffness argument F = \u03c3A = E\u03b5A = EA(\u03b4/L)",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Write the 2x2 local stiffness matrix for a bar element and identify it as identical in form to the spring matrix",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Explain physically why stiffness increases with E and A and decreases with L",
+          "blooms_level": "understand"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking the bar element stiffness matrix has a different form from the spring matrix \u2014 it does not, only k changes",
+        "M2": "Confusing stress (\u03c3 = F/A) with force (F = k\u03b4) \u2014 mixing element-level and material-level quantities",
+        "M3": "Not recognizing that this derivation assumes uniform cross-section, uniform material, and small deformations"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Traces the logic from applied force \u2192 stress \u2192 strain \u2192 elongation \u2192 stiffness",
+          "Explains that a thicker bar (larger A) distributes force over more area, so less strain, so stiffer",
+          "Explains that a longer bar (larger L) has more material to deform, so more total elongation, so less stiff",
+          "Recognizes the local stiffness matrix as the spring matrix with k = EA/L"
+        ],
+        "negative": [
+          "Writes k = EA/L as a formula without deriving or explaining it",
+          "Cannot explain why stiffness is inversely proportional to length",
+          "Treats the bar element as fundamentally different from the spring element"
+        ]
+      }
+    },
+    "two_d_dofs": {
+      "title": "Degrees of Freedom in 2D",
+      "module": "truss_elements",
+      "prerequisites": [
+        "bar_element"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Identify the DOFs in a 2D truss system \u2014 two translational DOFs per node",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain why a truss element has 4 global DOFs but only 2 local DOFs \u2014 the bar can only deform along its axis, not perpendicular to it",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Decompose a global displacement vector into components along and perpendicular to the bar axis",
+          "blooms_level": "apply"
+        },
+        "LO4": {
+          "description": "Explain physically why a truss element has zero stiffness perpendicular to its axis \u2014 it can only carry axial force",
+          "blooms_level": "understand"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking the element stiffness matrix in local coordinates should be 4x4 because the element has 4 global DOFs",
+        "M2": "Not understanding that the perpendicular-to-axis direction exists in the global system but is invisible to the element in local coordinates",
+        "M3": "Confusing local coordinate directions with global X,Y directions",
+        "M4": "Thinking that because there is no stiffness perpendicular to the bar, the perpendicular DOFs do not exist \u2014 they exist in the global system, the element just has zero contribution to them"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that a bar/truss element can only push or pull along its axis \u2014 it cannot resist lateral forces",
+          "Connects the 2x2 local matrix to the physical fact that only the axial DOF matters locally",
+          "Explains the 4x4 global matrix as expressing the 2x2 axial behavior in terms of the X,Y components at each node",
+          "Uses the analogy: the element sees a 1D world along its axis, the global system sees a 2D world"
+        ],
+        "negative": [
+          "Thinks the local matrix should be 4x4",
+          "Cannot explain why perpendicular displacement does not produce forces in the bar",
+          "Treats the dimension mismatch as a mathematical problem rather than a physical consequence",
+          "Confuses zero stiffness in a direction with the DOF not existing"
+        ]
+      }
+    },
+    "coordinate_transformation": {
+      "title": "The Transformation Matrix",
+      "module": "truss_elements",
+      "prerequisites": [
+        "two_d_dofs"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Build the transformation matrix T from the element angle \u03b8 using cos\u03b8 and sin\u03b8",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain what T does physically \u2014 it projects global displacement components onto the local (axial/perpendicular) directions",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Verify that T is orthogonal (T^T T = I) and explain why this must be true \u2014 rotation preserves length",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Apply T to transform global displacement vectors into local displacement vectors for specific elements",
+          "blooms_level": "apply"
+        }
+      },
+      "misconceptions": {
+        "M1": "Getting the signs wrong in T \u2014 confusing which row corresponds to the axial direction and which to the perpendicular direction",
+        "M2": "Thinking T depends on the stiffness or material properties \u2014 it depends only on geometry (angle)",
+        "M3": "Not understanding that T for each element is different because each element has a different orientation",
+        "M4": "Confusing the transformation of displacements (u_local = T u_global) with the transformation of the stiffness matrix (K_global = T^T K_local T)"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains T as a projection: the first row extracts the component along the bar, the second row extracts the component perpendicular",
+          "Verifies T by testing known cases: \u03b8 = 0\u00b0 should give identity-like behavior, \u03b8 = 90\u00b0 should swap components",
+          "Connects orthogonality of T to the physical fact that rotation does not change the length of the displacement vector",
+          "Can predict the effect of T on a given displacement vector before computing"
+        ],
+        "negative": [
+          "Builds T mechanically from the formula without physical interpretation",
+          "Cannot explain what each row of T extracts",
+          "Does not verify T with simple angle cases",
+          "Treats T as a purely mathematical object without geometric meaning"
+        ]
+      }
+    },
+    "global_element_stiffness": {
+      "title": "Transformed Element Stiffness",
+      "module": "truss_elements",
+      "prerequisites": [
+        "coordinate_transformation"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Compute K_global = T^T K_local_expanded T for a truss element",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Verify properties of K_global: symmetric, singular, row/column sums zero \u2014 same as spring elements in Module 1",
+          "blooms_level": "analyze"
+        },
+        "LO3": {
+          "description": "Explain physically why a bar at different angles produces different K_global entries even though the material and geometry are the same \u2014 the stiffness projects differently onto the global directions",
+          "blooms_level": "understand"
+        },
+        "LO4": {
+          "description": "Predict qualitative features of K_global from the element angle \u2014 which entries should be zero, which should be large, which should have specific signs",
+          "blooms_level": "evaluate"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking K_global should equal K_local \u2014 not understanding why the transformation is needed",
+        "M2": "Using T K_local T^T instead of T^T K_local T \u2014 getting the transformation backwards",
+        "M3": "Expecting K_global to have different properties from K_local (e.g., expecting it to be non-singular)",
+        "M4": "Not recognizing that K_global for a horizontal element has a specific sparse pattern \u2014 stiffness only in the X-direction"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that K_global expresses the same physical stiffness but in global X,Y coordinates instead of local axial coordinates",
+          "Verifies properties and connects them to the same physics as Module 1 (symmetry = Newton's third law, zero row sums = rigid body modes)",
+          "Can predict which K_global entries are zero from the element angle",
+          "Explains the cos\u00b2\u03b8 factor as a double projection: displacement onto axis, then force back onto global direction"
+        ],
+        "negative": [
+          "Computes K_global mechanically without interpreting the entries",
+          "Cannot explain why K_global differs from K_local",
+          "Does not verify properties after transformation",
+          "Cannot predict the pattern of K_global from the angle"
+        ]
+      }
+    },
+    "truss_assembly_solution": {
+      "title": "Truss System Analysis",
+      "module": "truss_elements",
+      "prerequisites": [
+        "global_element_stiffness"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Build the IBC (boundary condition identifier) array: flag each DOF as restrained (-1) or free (0), then assign equation numbers to free DOFs",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Assemble the reduced global stiffness matrix directly using the IBC array \u2014 only placing contributions where both row and column DOFs map to active equation numbers",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Apply boundary conditions and solve the reduced system for a 2D truss",
+          "blooms_level": "apply"
+        },
+        "LO4": {
+          "description": "Recognize that the assembly/BC/solve workflow is identical to Module 1 \u2014 only the element size (4x4 vs 2x2) and DOF count (2 per node vs 1) changed, and the IBC approach is an efficient alternative to elimination",
+          "blooms_level": "understand"
+        }
+      },
+      "misconceptions": {
+        "M1": "Errors in the connectivity/IBC mapping \u2014 confusing which global DOFs correspond to which element nodes with the 2-DOFs-per-node numbering",
+        "M2": "Not understanding that a pin support constrains both DOFs at a node \u2014 two entries flagged as -1 per pinned node",
+        "M3": "Thinking the assembly procedure changes for 2D \u2014 it does not, only the element contribution size changed",
+        "M4": "Applying loads in the wrong DOF \u2014 putting a horizontal force in the Y-DOF equation"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that the assembly logic is identical to Module 1 \u2014 use connectivity and IBC to place element contributions, add at shared DOFs (superposition of forces)",
+          "Correctly handles pin supports as constraining both translations at a node",
+          "Predicts qualitative displacement direction before solving",
+          "Connects the IBC approach to Module 1's elimination as equivalent methods, with IBC being more efficient for large systems"
+        ],
+        "negative": [
+          "Treats 2D assembly as a fundamentally new procedure",
+          "Makes DOF numbering errors and cannot diagnose them",
+          "Does not predict displacement direction before solving",
+          "Cannot explain the relationship between IBC assembly and Module 1's elimination approach"
+        ]
+      }
+    },
+    "truss_force_recovery": {
+      "title": "Force Recovery and Verification",
+      "module": "truss_elements",
+      "prerequisites": [
+        "truss_assembly_solution"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Extract element global displacements from the full displacement vector and transform back to local coordinates using T",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Compute the axial force in each element from the local displacements and determine tension vs. compression",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Verify equilibrium at each joint in global coordinates \u2014 the sum of all element forces plus external forces at each node must equal zero in both X and Y",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Verify that the perpendicular force component in local coordinates is zero for each element \u2014 confirming the truss assumption of no shear in truss members",
+          "blooms_level": "evaluate"
+        }
+      },
+      "misconceptions": {
+        "M1": "Forgetting to use the correct T for each element when back-transforming \u2014 using one element's T for another element's displacements",
+        "M2": "Sign confusion in axial force \u2014 not being clear about whether positive means tension or compression, and not checking against the physical picture",
+        "M3": "Checking equilibrium only in one direction (X or Y) instead of both",
+        "M4": "Not checking the perpendicular component \u2014 missing a powerful validation step specific to truss analysis",
+        "M5": "Computing reactions at supports but not verifying joint equilibrium at loaded nodes"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Uses the correct T for each element when back-transforming",
+          "Interprets axial force sign physically (positive = tension, negative = compression)",
+          "Checks equilibrium at every joint in both X and Y",
+          "Verifies zero perpendicular force and explains why it must be zero for a truss element",
+          "Traces the load path: how the applied force distributes through the bars to the supports"
+        ],
+        "negative": [
+          "Computes axial forces without interpreting tension vs. compression",
+          "Checks equilibrium only globally, not at individual joints",
+          "Does not verify the zero perpendicular force condition",
+          "Cannot trace the load path through the truss",
+          "Reports numbers without physical interpretation"
+        ]
+      }
+    },
+    "beam_element": {
+      "title": "The Pure Bending Element",
+      "module": "frame_elements",
+      "prerequisites": [
+        "truss_force_recovery"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Identify the 4 DOFs of the beam element [v\u2081, \u03b8\u2081, v\u2082, \u03b8\u2082] and their physical meaning \u2014 transverse displacements and rotations at each node",
+          "blooms_level": "understand"
+        },
+        "LO2": {
+          "description": "Write and interpret the 4\u00d74 Euler-Bernoulli beam stiffness matrix: identify 12EI/L\u00b3 as transverse stiffness, 4EI/L as rotational stiffness, 6EI/L\u00b2 as displacement-rotation coupling, and 2EI/L as carry-over moment",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Verify matrix properties: symmetric (Newton's third law), singular with rank 2 (two rigid body modes: translation and rotation), and explain why the beam has 2 rigid body modes while the bar had 1",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking the beam element stiffness matrix should be 2\u00d72 like the bar \u2014 the beam has 2 DOFs per node (v and \u03b8), giving a 4\u00d74 matrix",
+        "M2": "Confusing the beam element (resists bending only, no axial) with the frame element (resists bending AND axial)",
+        "M3": "Not recognizing the coupling between transverse displacement and rotation \u2014 displacing one end transversely produces both shear and moment",
+        "M4": "Thinking row sums equal zero applies to the full rows \u2014 for beams, the translational and rotational rigid body modes give different null-space conditions"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Identifies v and \u03b8 as independent DOFs at each node",
+          "Explains 12EI/L\u00b3 as the force to produce unit transverse displacement with all other DOFs locked",
+          "Explains 2EI/L as carry-over: rotating one end induces a moment at the far end even when the far end is fixed",
+          "Recognizes 2 rigid body modes (translate and rotate the whole beam without deforming)"
+        ],
+        "negative": [
+          "Cannot identify what each entry physically represents",
+          "Thinks the beam matrix should be 2\u00d72",
+          "Does not recognize the coupling terms",
+          "Confuses rigid body modes of the beam with those of the bar"
+        ]
+      }
+    },
+    "frame_element": {
+      "title": "Combining Bar and Beam \u2014 The Frame Element",
+      "module": "frame_elements",
+      "prerequisites": [
+        "beam_element"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Construct the 6\u00d76 frame element stiffness matrix by combining the 2\u00d72 bar matrix (axial DOFs) and the 4\u00d74 beam matrix (bending DOFs) into DOF ordering [u\u2081, v\u2081, \u03b8\u2081, u\u2082, v\u2082, \u03b8\u2082]",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain why axial and bending are uncoupled in local coordinates \u2014 the bar and beam operate on independent DOFs, visible as block-diagonal structure in K_local",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Verify properties: symmetric, singular with rank 3 (three 2D rigid body modes: translate-x, translate-y, rotate)",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Explain that the frame element is the general 2D element \u2014 the bar is the special case with EI=0, the beam is the special case with EA=0",
+          "blooms_level": "understand"
+        }
+      },
+      "misconceptions": {
+        "M1": "Placing bar matrix entries in wrong positions \u2014 axial DOFs are u\u2081 and u\u2082 at positions 0 and 3, not adjacent",
+        "M2": "Thinking there should be coupling between axial and bending terms in local coordinates",
+        "M3": "Getting DOF ordering wrong \u2014 standard is [u, v, \u03b8] per node",
+        "M4": "Expecting 2 rigid body modes (like the beam alone) instead of 3"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Identifies that bar occupies u-DOF positions and beam occupies v,\u03b8-DOF positions",
+          "Explains block structure: axial and bending independent in local coords under small-deformation theory",
+          "Counts rigid body modes correctly: translate-x, translate-y, rotate",
+          "Connects to Module 2 (bar) and previous node (beam)"
+        ],
+        "negative": [
+          "Cannot assemble 6\u00d76 from 2\u00d72 and 4\u00d74 components",
+          "Places entries in wrong positions",
+          "Does not recognize block-diagonal structure",
+          "Cannot explain why axial and bending are uncoupled locally"
+        ]
+      }
+    },
+    "frame_transformation": {
+      "title": "The 6\u00d76 Transformation Matrix",
+      "module": "frame_elements",
+      "prerequisites": [
+        "frame_element"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Build the 6\u00d76 transformation matrix T for a frame element \u2014 the 2\u00d72 rotation [[c,s],[-s,c]] applied to [u,v] at each node, with \u03b8 passing through unchanged",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Explain why \u03b8 does not transform \u2014 rotation is about the out-of-plane axis, which is the same in local and global coordinates",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Apply T for a vertical column (\u03b8=90\u00b0) and verify: local axial maps to global Y, local transverse maps to global -X",
+          "blooms_level": "apply"
+        },
+        "LO4": {
+          "description": "Compare frame T to truss T from Module 2: frame has 3\u00d73 blocks (with \u03b8 pass-through), truss has 2\u00d72 blocks \u2014 same rotation, extended for extra DOF",
+          "blooms_level": "analyze"
+        }
+      },
+      "misconceptions": {
+        "M1": "Trying to rotate \u03b8 along with u and v \u2014 writing a full 3\u00d73 rotation for each node instead of 2\u00d72 rotation for [u,v] with \u03b8 unchanged",
+        "M2": "Getting block structure wrong \u2014 T is block diagonal with two 3\u00d73 blocks, one per node",
+        "M3": "Confusing frame T with truss T \u2014 not accounting for the \u03b8 row/column",
+        "M4": "Not verifying T at special angles (0\u00b0 and 90\u00b0)"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Explains that 3\u00d73 block rotates [u,v] and passes \u03b8 through",
+          "Verifies at \u03b8=0\u00b0 (identity) and \u03b8=90\u00b0 (swaps u\u2194v directions, \u03b8 unchanged)",
+          "Connects to Module 2's T and explains the extension",
+          "Predicts what T does to a displacement vector before computing"
+        ],
+        "negative": [
+          "Builds T mechanically without understanding structure",
+          "Cannot explain why \u03b8 is unchanged",
+          "Does not verify at special angles",
+          "Confuses with truss transformation"
+        ]
+      }
+    },
+    "frame_global_stiffness": {
+      "title": "Transformed Frame Stiffness",
+      "module": "frame_elements",
+      "prerequisites": [
+        "frame_transformation"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Compute K_global = T^T K_local T for a frame element at a given angle",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "For a vertical column (\u03b8=90\u00b0), identify that bending stiffness appears in global X and axial stiffness appears in global Y \u2014 the transformation swaps roles",
+          "blooms_level": "understand"
+        },
+        "LO3": {
+          "description": "Explain why axial and bending become coupled in global coordinates for inclined elements \u2014 rotation mixes them even though they are uncoupled locally",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Predict the qualitative K_global structure: 0\u00b0 (local=global), 90\u00b0 (axial\u2194Y, bending\u2194X), general angles (all DOFs coupled)",
+          "blooms_level": "evaluate"
+        }
+      },
+      "misconceptions": {
+        "M1": "Thinking a column should have axial stiffness in X \u2014 for a vertical column, axial direction is Y",
+        "M2": "Expecting axial and bending to remain uncoupled in global coordinates for inclined elements",
+        "M3": "Making errors in 6\u00d76 matrix multiplication",
+        "M4": "Not recognizing K_global = K_local for \u03b8=0\u00b0"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "For \u03b8=90\u00b0, immediately identifies bending\u2192X and axial\u2192Y",
+          "Explains that transformation mixes axial and bending for inclined elements",
+          "Verifies symmetry and singularity after transformation",
+          "Predicts pattern before computing"
+        ],
+        "negative": [
+          "Cannot identify which direction gets bending vs axial for a vertical element",
+          "Expects uncoupling to survive transformation",
+          "Does not verify properties",
+          "Treats computation as purely mechanical"
+        ]
+      }
+    },
+    "frame_assembly_solution": {
+      "title": "Portal Frame Analysis",
+      "module": "frame_elements",
+      "prerequisites": [
+        "frame_global_stiffness"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Build the IBC array with 3 DOFs per node, handling fixed (all 3 restrained), pin (u,v restrained, \u03b8 free), and roller supports",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Assemble the reduced global stiffness matrix for a portal frame using IBC, placing 3\u00d73 subblocks from each element contribution",
+          "blooms_level": "apply"
+        },
+        "LO3": {
+          "description": "Solve the portal frame and interpret results: sway displacement, joint rotations, and the axially-rigid simplification",
+          "blooms_level": "apply"
+        },
+        "LO4": {
+          "description": "Recognize the assembly workflow is identical to Modules 1-2 \u2014 element size grew from 2\u00d72 to 4\u00d74 to 6\u00d76, but IBC logic is unchanged",
+          "blooms_level": "understand"
+        }
+      },
+      "misconceptions": {
+        "M1": "Confusing fixed and pin supports: fixed restrains u, v, and \u03b8; pin restrains only u and v, leaving \u03b8 free",
+        "M2": "DOF mapping errors with 3 DOFs per node",
+        "M3": "Not recognizing assembly procedure is identical to Modules 1-2, just with larger element contributions",
+        "M4": "Forgetting to include moment equation when assembling loads"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Correctly distinguishes fixed, pin, and roller supports in IBC",
+          "Maps element DOFs systematically using connectivity + IBC",
+          "Predicts sway direction and joint rotation before solving",
+          "Recognizes workflow continuity from Modules 1-2"
+        ],
+        "negative": [
+          "Confuses support types in IBC",
+          "Makes DOF mapping errors",
+          "Does not predict behavior before solving",
+          "Treats frame assembly as a new procedure"
+        ]
+      }
+    },
+    "frame_force_recovery": {
+      "title": "Frame Force Recovery and Verification",
+      "module": "frame_elements",
+      "prerequisites": [
+        "frame_assembly_solution"
+      ],
+      "learning_objectives": {
+        "LO1": {
+          "description": "Extract element displacements, transform to local, recover all 6 end forces: axial, shear, and moment at each end",
+          "blooms_level": "apply"
+        },
+        "LO2": {
+          "description": "Verify joint equilibrium at free nodes: sum of element forces plus applied loads equals zero in all 3 equations (Fx, Fy, M)",
+          "blooms_level": "analyze"
+        },
+        "LO3": {
+          "description": "Compute reactions at supports and verify global equilibrium: forces sum to zero and moments about any point sum to zero",
+          "blooms_level": "analyze"
+        },
+        "LO4": {
+          "description": "Sketch qualitative shear and bending moment diagrams for frame members from the end forces, and trace the load path from applied load through members to supports",
+          "blooms_level": "evaluate"
+        }
+      },
+      "misconceptions": {
+        "M1": "Forgetting to use the correct T for each element when back-transforming",
+        "M2": "Sign confusion: f = Ku gives forces the node applies to the element; the element exerts -f on the node",
+        "M3": "Checking only force equilibrium, forgetting moment equilibrium at joints",
+        "M4": "For global moment equilibrium, forgetting moment arms (force \u00d7 distance contributions)",
+        "M5": "Confusing local end forces with global reactions"
+      },
+      "physical_reasoning_markers": {
+        "positive": [
+          "Uses correct T for each element",
+          "Recovers all three quantities (axial, shear, moment) and interprets signs",
+          "Checks joint equilibrium in all 3 equations at every free node",
+          "Traces complete load path: applied force \u2192 member forces \u2192 support reactions",
+          "Sketches qualitative moment diagram showing distribution through frame"
+        ],
+        "negative": [
+          "Recovers only some end forces",
+          "Does not check joint equilibrium",
+          "Checks only force equilibrium, not moment",
+          "Cannot trace load path",
+          "Reports numbers without physical interpretation"
+        ]
+      }
     }
   },
   "edges": [
-    ["element_stiffness", "local_global_dofs"],
-    ["local_global_dofs", "assembly"],
-    ["assembly", "boundary_conditions"],
-    ["boundary_conditions", "solution"],
-    ["solution", "verification"]
+    [
+      "element_stiffness",
+      "local_global_dofs"
+    ],
+    [
+      "local_global_dofs",
+      "assembly"
+    ],
+    [
+      "assembly",
+      "boundary_conditions"
+    ],
+    [
+      "boundary_conditions",
+      "solution"
+    ],
+    [
+      "solution",
+      "verification"
+    ],
+    [
+      "verification",
+      "bar_element"
+    ],
+    [
+      "bar_element",
+      "two_d_dofs"
+    ],
+    [
+      "two_d_dofs",
+      "coordinate_transformation"
+    ],
+    [
+      "coordinate_transformation",
+      "global_element_stiffness"
+    ],
+    [
+      "global_element_stiffness",
+      "truss_assembly_solution"
+    ],
+    [
+      "truss_assembly_solution",
+      "truss_force_recovery"
+    ],
+    [
+      "truss_force_recovery",
+      "beam_element"
+    ],
+    [
+      "beam_element",
+      "frame_element"
+    ],
+    [
+      "frame_element",
+      "frame_transformation"
+    ],
+    [
+      "frame_transformation",
+      "frame_global_stiffness"
+    ],
+    [
+      "frame_global_stiffness",
+      "frame_assembly_solution"
+    ],
+    [
+      "frame_assembly_solution",
+      "frame_force_recovery"
+    ]
   ],
   "entry_prerequisites": {
-    "element_stiffness": ["spring_behavior", "matrix_algebra"]
+    "element_stiffness": [
+      "spring_behavior",
+      "matrix_algebra"
+    ]
   }
 }

@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "description": "Structured notebook reference knowledge base for the FEA tutor. Contains code, expert narrations, and cross-module evolution notes for the teacher agent.",
+    "usage": "The teacher agent retrieves entries by (module, function_family) or by curriculum_node. During MODEL state, it shows the code and narrates. During GUIDED_PRACTICE, it uses the code as reference. During REFLECTION, it shows cross-module comparisons."
+  },
+  "notebook_references": {
+    "uelspring": {
+      "module": "module1_springs",
+      "function_family": "uelXXX",
+      "curriculum_nodes": [
+        "element_stiffness"
+      ],
+      "code": "def uelspring(kcof):\n    kl = np.zeros([2, 2])\n    kl[0, 0] = kcof\n    kl[0, 1] = -kcof\n    kl[1, 0] = -kcof\n    kl[1, 1] = kcof\n    return kl",
+      "expert_narration": "This is the simplest possible element stiffness function. It builds the 2\u00d72 matrix [[k, -k], [-k, k]] directly from the stiffness coefficient. There is no transformation \u2014 springs are 1D, so local = global. Notice the pattern: diagonal terms are +k (restoring force), off-diagonal terms are -k (coupling force). Every stiffness matrix in every element type will have this same structure at its core: positive diagonal, negative off-diagonal coupling.",
+      "what_student_should_notice": [
+        "The matrix is symmetric (kl[0,1] = kl[1,0])",
+        "Diagonal terms are positive, off-diagonal negative",
+        "Each row sums to zero (rigid body mode)",
+        "No coordinate transformation needed for 1D springs"
+      ],
+      "questions_the_tutor_can_ask": [
+        "What would this function return if kcof = 0? What does that mean physically?",
+        "Why does the code build a full 2\u00d72 matrix instead of just storing k?",
+        "If I gave you two springs with different stiffnesses, would this function be called once or twice?"
+      ]
+    },
+    "ueltruss2D": {
+      "module": "module2_trusses",
+      "function_family": "uelXXX",
+      "curriculum_nodes": [
+        "bar_element",
+        "coordinate_transformation",
+        "global_element_stiffness"
+      ],
+      "code": "def ueltruss2D(coord, A, Emod):\n    vec = coord[1, :] - coord[0, :]\n    length = np.linalg.norm(vec)\n    nx = vec[0]/length\n    ny = vec[1]/length\n    Q = np.array([\n        [nx, ny, 0, 0],\n        [0,  0, nx, ny]])\n    kl = (A*Emod/length) * np.array([\n        [1, -1],\n        [-1, 1]])\n    kG = np.dot(np.dot(Q.T, kl), Q)\n    return kG",
+      "expert_narration": "This function does THREE things in sequence that the curriculum separates into three nodes:\n\n1. Lines 2-5: Compute element geometry \u2014 direction cosines nx, ny from the coordinate difference. This is the element orientation.\n\n2. Lines 6-8: Build the transformation matrix Q (2\u00d74). Q maps 4 global DOFs [u1x, u1y, u2x, u2y] to 2 local DOFs [u1_axial, u2_axial]. Each row picks out the axial component: nx*ux + ny*uy.\n\n3. Lines 9-11: Build K_local (2\u00d72) \u2014 identical to the spring! It's (EA/L) \u00d7 [[1,-1],[-1,1]]. Then transform: K_global = Q^T \u00d7 K_local \u00d7 Q.\n\nThe key insight: K_local is just a spring stiffness matrix with k = EA/L. The transformation Q is what makes it work in 2D. The student should see that the truss element IS a spring that's been rotated into a 2D coordinate system.",
+      "what_student_should_notice": [
+        "K_local (lines 9-11) is the SAME [[1,-1],[-1,1]] pattern as the spring",
+        "Q extracts the axial displacement from 2D: u_axial = nx*ux + ny*uy",
+        "K_global = Q^T K_local Q is a 4\u00d74 matrix from a 2\u00d72 local",
+        "The function computes geometry from coordinates \u2014 it doesn't need an angle input"
+      ],
+      "questions_the_tutor_can_ask": [
+        "Find the line that builds K_local. Compare it to uelspring. What's the same?",
+        "What is Q doing physically? Why is it 2\u00d74 and not 4\u00d74?",
+        "If the truss element is horizontal (ny=0), what does Q simplify to?",
+        "Where in this code would you make a change to add a thermal load?"
+      ],
+      "decomposition_for_curriculum": {
+        "bar_element_stiffness": "Lines 9-11: kl = (EA/L) * [[1,-1],[-1,1]]",
+        "coordinate_transformation": "Lines 2-8: direction cosines and Q matrix",
+        "global_element_stiffness": "Line 12: kG = Q^T kl Q"
+      }
+    },
+    "uelbeam2DU": {
+      "module": "module3_frames",
+      "function_family": "uelXXX",
+      "curriculum_nodes": [
+        "beam_element",
+        "frame_element",
+        "frame_transformation",
+        "frame_global_stiffness"
+      ],
+      "code": "def uelbeam2DU(coord, I, Emod):\n    vec = coord[1, :] - coord[0, :]\n    nx = vec[0]/np.linalg.norm(vec)\n    ny = vec[1]/np.linalg.norm(vec)\n    L = np.linalg.norm(vec)\n    Q = np.array([\n        [-ny, nx,   0,  0,  0, 0],\n        [0,  0, 1.0,  0,  0, 0],\n        [0,  0,   0, -ny, nx, 0],\n        [0,  0,  0,  0,  0, 1.0]])\n    kl = (I*Emod/(L*L*L)) * np.array([\n        [12.0, 6*L, -12.0, 6*L],\n        [6*L,  4*L*L, -6*L, 2*L*L],\n        [-12.0,  -6*L, 12.0, -6*L],\n        [6*L,  2*L*L, -6*L, 4*L*L]])\n    kG = np.dot(np.dot(Q.T, kl), Q)\n    return kG",
+      "expert_narration": "This function builds a beam element WITHOUT axial DOFs \u2014 4 local DOFs (v1, \u03b81, v2, \u03b82) mapped to 6 global DOFs (ux1, uy1, \u03b81, ux2, uy2, \u03b82). The same three-step pattern as the truss:\n\n1. Lines 2-5: Geometry \u2014 direction cosines and length from coordinates.\n\n2. Lines 6-10: Q matrix (4\u00d76). This is more complex than the truss Q. Row 1 extracts transverse displacement: v = -ny*ux + nx*uy. Row 2 passes \u03b8 through unchanged. Rows 3-4 repeat for the second node. Note: there is NO axial DOF in the local system \u2014 the beam is assumed axially rigid.\n\n3. Lines 11-15: K_local (4\u00d74) \u2014 the Euler-Bernoulli beam stiffness matrix with coefficients 12EI/L\u00b3, 6EI/L\u00b2, 4EI/L, 2EI/L. Then K_global = Q^T K_local Q gives a 6\u00d76.\n\nIMPORTANT DIFFERENCE FROM CURRICULUM: Our curriculum builds the FULL 6\u00d76 frame element (axial + bending). This notebook omits axial DOFs. The tutor should use this as a teaching moment: 'The notebook's beam has infinite axial stiffness. Our curriculum builds the general frame element that includes both axial and bending. Let me show you how they differ.'",
+      "what_student_should_notice": [
+        "K_local is 4\u00d74 (beam only), not 6\u00d76 (frame)",
+        "Q is 4\u00d76 \u2014 it maps 6 global DOFs to 4 local DOFs (no axial)",
+        "Row 1 of Q extracts transverse displacement: v = -ny*ux + nx*uy",
+        "\u03b8 passes through unchanged (rows 2, 4 of Q)",
+        "The 12, 6L, 4L\u00b2, 2L\u00b2 coefficients match the beam stiffness matrix from class"
+      ],
+      "questions_the_tutor_can_ask": [
+        "This beam has no axial stiffness. What assumption does that represent?",
+        "Compare Q here to Q in ueltruss2D. The truss Q extracts axial displacement. What does the beam Q extract?",
+        "If you wanted to add axial DOFs, how would K_local and Q change?",
+        "For a vertical column (nx=0, ny=1), what does row 1 of Q simplify to? What does that mean physically?"
+      ],
+      "decomposition_for_curriculum": {
+        "beam_element": "Lines 11-15: 4\u00d74 Euler-Bernoulli beam stiffness matrix",
+        "frame_transformation": "Lines 6-10: Q matrix with transverse extraction and \u03b8 pass-through",
+        "frame_global_stiffness": "Line 16: kG = Q^T kl Q"
+      },
+      "curriculum_vs_notebook_difference": {
+        "notebook_approach": "Beam without axial DOFs: 4 local DOFs, 4\u00d74 K_local, 4\u00d76 Q \u2192 6\u00d76 K_global",
+        "curriculum_approach": "Frame with axial DOFs: 6 local DOFs, 6\u00d76 K_local (block diagonal: bar + beam), 6\u00d76 T \u2192 6\u00d76 K_global",
+        "teaching_note": "Both give the same K_global for the axially-rigid case. The curriculum approach is more general and builds on the truss element knowledge. The notebook approach is a shortcut that exploits the axial rigidity assumption directly in Q."
+      }
+    },
+    "eqcounter_springs": {
+      "module": "module1_springs",
+      "function_family": "eqcounter",
+      "curriculum_nodes": [
+        "boundary_conditions"
+      ],
+      "code": "def eqcounter(nodes):\n    nn = nodes.shape[0]\n    IBC = np.zeros([nn, 1], dtype=int)\n    neq = 0\n    for i in range(nn):\n        IBC[i] = int(nodes[i, 2])\n        if IBC[i] == 0:\n            IBC[i] = neq\n            neq = neq + 1\n    return neq, IBC",
+      "expert_narration": "This is the IBC array construction for springs. Each node has 1 DOF. The input nodes array has a flag in column 2: 0 means free, -1 means restrained. The function scans through, assigns sequential equation numbers (0, 1, 2, ...) to free DOFs, and leaves -1 for restrained ones. The output neq tells you the system size \u2014 how many equations to solve."
+    },
+    "eqcounter_truss": {
+      "module": "module2_trusses",
+      "function_family": "eqcounter",
+      "curriculum_nodes": [
+        "truss_assembly_solution"
+      ],
+      "code": "def eqcounter(nodes):\n    nnodes = nodes.shape[0]\n    IBC = np.zeros([nnodes, 2], dtype=int)\n    for i in range(nnodes):\n        for k in range(2):\n            IBC[i, k] = int(nodes[i, k+3])\n    neq = 0\n    for i in range(nnodes):\n        for j in range(2):\n            if IBC[i, j] == 0:\n                IBC[i, j] = neq\n                neq = neq + 1\n    return neq, IBC",
+      "expert_narration": "Same logic as springs but now 2 DOFs per node (ux, uy). IBC is now nn\u00d72. Two passes: first read the flags from the node data, then assign equation numbers to free DOFs. The equation numbering scans node-by-node, DOF-by-DOF."
+    },
+    "eqcounter_frame": {
+      "module": "module3_frames",
+      "function_family": "eqcounter",
+      "curriculum_nodes": [
+        "frame_assembly_solution"
+      ],
+      "code": "def eqcounter(nodes):\n    nnodes = nodes.shape[0]\n    IBC = np.zeros([nnodes, 3], dtype=int)\n    for i in range(nnodes):\n        for k in range(3):\n            IBC[i, k] = int(nodes[i, k+3])\n    neq = 0\n    for i in range(nnodes):\n        for j in range(3):\n            if IBC[i, j] == 0:\n                IBC[i, j] = neq\n                neq = neq + 1\n    return neq, IBC",
+      "expert_narration": "Now 3 DOFs per node (ux, uy, \u03b8). IBC is nn\u00d73. Identical logic. The student should realize: this function is essentially the same across all 3 modules. The only difference is the inner loop range (1, 2, or 3). A production code would parameterize this."
+    },
+    "DME_springs": {
+      "module": "module1_springs",
+      "function_family": "DME",
+      "curriculum_nodes": [
+        "local_global_dofs",
+        "assembly"
+      ],
+      "code": "def DME(nodes, elements):\n    nels = elements.shape[0]\n    DME = np.zeros([nels, 2], dtype=int)\n    neq, IBC = eqcounter(nodes)\n    ndof = 2\n    nnodes = 2\n    for i in range(nels):\n        for j in range(nnodes):\n            kk = elements[i, j+3]\n            DME[i, j] = IBC[kk]\n    return DME, IBC, neq",
+      "expert_narration": "DME builds the assembly operator. For each element, it looks up which global nodes are connected (from the elements array), then fetches their equation numbers from IBC. The result: DME[el, :] = [eq_node_i, eq_node_j]. If either is -1, that DOF is restrained and won't enter the global matrix. This is the concrete implementation of the local-to-global DOF mapping."
+    },
+    "DME_truss": {
+      "module": "module2_trusses",
+      "function_family": "DME",
+      "curriculum_nodes": [
+        "two_d_dofs",
+        "truss_assembly_solution"
+      ],
+      "code": "def DME(nodes, elements):\n    nels = elements.shape[0]\n    IELCON = np.zeros([nels, 2], dtype=int)\n    DME = np.zeros([nels, 4], dtype=int)\n    neq, IBC = eqcounter(nodes)\n    ndof = 4\n    nnodes = 2\n    for i in range(nels):\n        for j in range(nnodes):\n            IELCON[i, j] = elements[i, j+3]\n            kk = IELCON[i, j]\n            for l in range(2):\n                DME[i, 2*j+l] = IBC[kk, l]\n    return DME, IBC, neq",
+      "expert_narration": "Now 4 DOFs per element (2 per node \u00d7 2 nodes). The inner loop over l maps each DOF at a node to its equation number: DME[el, 2*j+l] = IBC[node, l]. So DME[el, :] = [eq_n1_ux, eq_n1_uy, eq_n2_ux, eq_n2_uy]. The IELCON array tracks which global nodes belong to each element."
+    },
+    "DME_frame": {
+      "module": "module3_frames",
+      "function_family": "DME",
+      "curriculum_nodes": [
+        "frame_assembly_solution"
+      ],
+      "code": "def DME(nodes, elements):\n    nels = elements.shape[0]\n    IELCON = np.zeros([nels, 2], dtype=int)\n    DME = np.zeros([nels, 6], dtype=int)\n    neq, IBC = eqcounter(nodes)\n    ndof = 6\n    nnodes = 2\n    for i in range(nels):\n        for j in range(nnodes):\n            IELCON[i, j] = elements[i, j+3]\n            kk = IELCON[i, j]\n            for l in range(3):\n                DME[i, 3*j+l] = IBC[kk, l]\n    return DME, IBC, neq",
+      "expert_narration": "6 DOFs per element (3 per node \u00d7 2 nodes). Inner loop range changes from 2 to 3. DME[el, :] = [eq_n1_ux, eq_n1_uy, eq_n1_\u03b8, eq_n2_ux, eq_n2_uy, eq_n2_\u03b8]. The pattern is completely general: DOFs_per_node \u00d7 j + l gives the position in the DME row."
+    },
+    "assembly_springs": {
+      "module": "module1_springs",
+      "function_family": "assembly",
+      "curriculum_nodes": [
+        "assembly"
+      ],
+      "code": "def assembly(elements, mats, nodes, neq, DME, uel=None):\n    IELCON = np.zeros([2], dtype=int)\n    KG = np.zeros((neq, neq))\n    nels = elements.shape[0]\n    nnodes = 2\n    ndof = 2\n    for el in range(nels):\n        elcoor = np.zeros([nnodes])\n        im = int(elements[el, 2])\n        par0 = mats[im]\n        for j in range(nnodes):\n            IELCON[j] = elements[el, j+3]\n            elcoor[j] = nodes[IELCON[j], 1]\n        kloc = uelspring(par0)\n        dme = DME[el, :ndof]\n        for row in range(ndof):\n            glob_row = dme[row]\n            if glob_row != -1:\n                for col in range(ndof):\n                    glob_col = dme[col]\n                    if glob_col != -1:\n                        KG[glob_row, glob_col] = KG[glob_row, glob_col] + kloc[row, col]\n    return KG",
+      "expert_narration": "The assembly loop. For each element: (1) extract material and coordinates, (2) compute element stiffness via uelspring, (3) use the DME operator to scatter-add kloc into KG. The critical lines are the double loop at the bottom: for each row and column of the element matrix, find the corresponding global position via dme, skip if -1, otherwise add. This is the direct stiffness method in code."
+    },
+    "assembly_truss": {
+      "module": "module2_trusses",
+      "function_family": "assembly",
+      "curriculum_nodes": [
+        "truss_assembly_solution"
+      ],
+      "code": "def assembly(elements, mats, nodes, neq, DME, uel=None):\n    IELCON = np.zeros([2], dtype=int)\n    KG = np.zeros((neq, neq))\n    nels = elements.shape[0]\n    nnodes = 2\n    ndof = 4\n    for el in range(nels):\n        elcoor = np.zeros([nnodes, 2])\n        im = int(elements[el, 2])\n        par0 = mats[im, 0]\n        par1 = mats[im, 1]\n        for j in range(nnodes):\n            IELCON[j] = elements[el, j+3]\n            elcoor[j, 0] = nodes[IELCON[j], 1]\n            elcoor[j, 1] = nodes[IELCON[j], 2]\n        kloc = ueltruss2D(elcoor, par0, par1)\n        dme = DME[el, :ndof]\n        for row in range(ndof):\n            glob_row = dme[row]\n            if glob_row != -1:\n                for col in range(ndof):\n                    glob_col = dme[col]\n                    if glob_col != -1:\n                        KG[glob_row, glob_col] = KG[glob_row, glob_col] + kloc[row, col]\n    return KG",
+      "expert_narration": "Identical structure to springs. Changes: 2D coordinates (elcoor is now nnodes\u00d72), two material parameters (A, E), calls ueltruss2D instead of uelspring, ndof=4. But the scatter-add loop at the bottom is CHARACTER-FOR-CHARACTER the same. This is the point: assembly doesn't care what element type produced kloc."
+    },
+    "assembly_frame": {
+      "module": "module3_frames",
+      "function_family": "assembly",
+      "curriculum_nodes": [
+        "frame_assembly_solution"
+      ],
+      "code": "def assembly(elements, mats, nodes, neq, DME, uel=None):\n    IELCON = np.zeros([2], dtype=int)\n    KG = np.zeros((neq, neq))\n    nels = elements.shape[0]\n    nnodes = 2\n    ndof = 6\n    for el in range(nels):\n        elcoor = np.zeros([nnodes, 2])\n        im = int(elements[el, 2])\n        par0 = mats[im, 0]\n        par1 = mats[im, 1]\n        for j in range(nnodes):\n            IELCON[j] = elements[el, j+3]\n            elcoor[j, 0] = nodes[IELCON[j], 1]\n            elcoor[j, 1] = nodes[IELCON[j], 2]\n        kloc = uelbeam2DU(elcoor, par0, par1)\n        dme = DME[el, :ndof]\n        for row in range(ndof):\n            glob_row = dme[row]\n            if glob_row != -1:\n                for col in range(ndof):\n                    glob_col = dme[col]\n                    if glob_col != -1:\n                        KG[glob_row, glob_col] = KG[glob_row, glob_col] + kloc[row, col]\n    return KG",
+      "expert_narration": "ndof=6, calls uelbeam2DU. Everything else identical. Three notebooks, three element types, one assembly algorithm. The student who understands the spring assembly loop understands all of FEA assembly."
+    },
+    "loadasem_springs": {
+      "module": "module1_springs",
+      "function_family": "loadasem",
+      "curriculum_nodes": [
+        "boundary_conditions",
+        "solution"
+      ],
+      "code": "def loadasem(loads, IBC, neq, nl):\n    RHSG = np.zeros([neq])\n    for i in range(nl):\n        il = int(loads[i, 0])\n        ilx = IBC[il]\n        if ilx != -1:\n            RHSG[ilx] = loads[i, 1]\n    return RHSG",
+      "expert_narration": "Load vector assembly for springs. Each load entry has: node index and force value. Look up the equation number from IBC, place the force there. Skip if restrained (-1)."
+    },
+    "loadasem_truss": {
+      "module": "module2_trusses",
+      "function_family": "loadasem",
+      "curriculum_nodes": [
+        "truss_assembly_solution"
+      ],
+      "code": "def loadasem(loads, IBC, neq, nl):\n    RHSG = np.zeros([neq])\n    for i in range(nl):\n        il = int(loads[i, 0])\n        ilx = IBC[il, 0]\n        ily = IBC[il, 1]\n        if ilx != -1:\n            RHSG[ilx] = loads[i, 1]\n        if ily != -1:\n            RHSG[ily] = loads[i, 2]\n    return RHSG",
+      "expert_narration": "Now 2 load components per node (Fx, Fy). Each gets its own equation number from IBC[:,0] and IBC[:,1]."
+    },
+    "loadasem_frame": {
+      "module": "module3_frames",
+      "function_family": "loadasem",
+      "curriculum_nodes": [
+        "frame_assembly_solution"
+      ],
+      "code": "def loadasem(loads, IBC, neq, nl):\n    RHSG = np.zeros([neq])\n    for i in range(nl):\n        il = int(loads[i, 0])\n        ilx = IBC[il, 0]\n        ily = IBC[il, 1]\n        ilT = IBC[il, 2]\n        if ilx != -1:\n            RHSG[ilx] = loads[i, 1]\n        if ily != -1:\n            RHSG[ily] = loads[i, 2]\n        if ilT != -1:\n            RHSG[ilT] = loads[i, 3]\n    return RHSG",
+      "expert_narration": "3 load components per node (Fx, Fy, M). Third component is moment, placed via IBC[:,2]. Same pattern, one more DOF."
+    }
+  },
+  "cross_module_evolution_table": {
+    "description": "Summary table showing how each function scales. Use during REFLECTION state to help students see the universal pattern.",
+    "columns": [
+      "function",
+      "springs (1 DOF)",
+      "trusses (2 DOF)",
+      "frames (3 DOF)",
+      "what changes"
+    ],
+    "rows": [
+      [
+        "uelXXX",
+        "2\u00d72 direct",
+        "2\u00d72 local \u2192 Q(2\u00d74) \u2192 4\u00d74 global",
+        "4\u00d74 local \u2192 Q(4\u00d76) \u2192 6\u00d76 global",
+        "local K size and Q dimensions"
+      ],
+      [
+        "eqcounter",
+        "IBC: nn\u00d71",
+        "IBC: nn\u00d72",
+        "IBC: nn\u00d73",
+        "columns in IBC (= DOFs per node)"
+      ],
+      [
+        "DME",
+        "nels\u00d72",
+        "nels\u00d74",
+        "nels\u00d76",
+        "columns in DME (= DOFs per element)"
+      ],
+      [
+        "assembly",
+        "ndof=2, calls uelspring",
+        "ndof=4, calls ueltruss2D",
+        "ndof=6, calls uelbeam2DU",
+        "ndof and which uelXXX is called"
+      ],
+      [
+        "loadasem",
+        "1 component",
+        "2 components (Fx,Fy)",
+        "3 components (Fx,Fy,M)",
+        "number of load components"
+      ],
+      [
+        "main program",
+        "identical",
+        "identical",
+        "identical",
+        "NOTHING \u2014 the pipeline is universal"
+      ]
+    ]
+  }
+}

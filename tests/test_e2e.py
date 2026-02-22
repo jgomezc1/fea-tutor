@@ -346,7 +346,7 @@ class TestStrongStudent:
         # Verify evaluator classified responses as deep
         deep_count = sum(
             1 for t in report["turns"]
-            if t.get("evaluation", {}).get("conceptual") == "deep"
+            if (t.get("evaluation") or {}).get("conceptual") == "deep"
         )
         assert deep_count >= 2, f"Expected at least 2 deep classifications, got {deep_count}"
 
@@ -374,7 +374,7 @@ class TestMechanicalStudent:
         # Evaluator should consistently classify as mechanical
         mechanical_evals = sum(
             1 for t in report["turns"]
-            if t.get("evaluation", {}).get("conceptual") == "mechanical"
+            if (t.get("evaluation") or {}).get("conceptual") == "mechanical"
         )
         print(f"  [check] Mechanical evaluations: {mechanical_evals}")
         assert mechanical_evals >= 3, (
@@ -418,7 +418,7 @@ class TestStrugglingStudent:
         # Should have errors detected
         error_evals = sum(
             1 for t in report["turns"]
-            if t.get("evaluation", {}).get("procedural") in ["major_error", "incomplete"]
+            if (t.get("evaluation") or {}).get("procedural") in ["major_error", "incomplete"]
         )
         print(f"  [check] Error evaluations: {error_evals}")
         assert error_evals >= 1, "Struggling student should have at least one error"
