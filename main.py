@@ -193,8 +193,8 @@ def run_session(orchestrator: Orchestrator, debug: bool = False):
                     "Do NOT end the session or say farewell — the session is continuing.]"
                 )
 
-                print(f"{Colors.YELLOW}[TRACE]   Calling teach() with EMPTY history + transition directive{Colors.RESET}")
-                response = teach(context, transition_prompt, [], client)
+                print(f"{Colors.YELLOW}[TRACE]   Calling teach() with conversation history + transition directive{Colors.RESET}")
+                response = teach(context, transition_prompt, conversation_history, client)
 
                 conversation_history.append({"role": "user", "content": student_input})
                 conversation_history.append({"role": "assistant", "content": response})
