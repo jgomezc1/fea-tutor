@@ -667,11 +667,17 @@ class Orchestrator:
                         self.student["bkt_params"]["mastery_threshold"]
                     )
                     self.state = "ADVANCE"
+                    # Mark all LOs as demonstrated upon mastery
+                    for lo in student_node["lo_status"]:
+                        student_node["lo_status"][lo] = "demonstrated"
                 elif check_mastery(student_node["p_mastery"],
                                  self.student["bkt_params"]["mastery_threshold"],
                                  student_node["level0_passed"],
                                  unresolved):
                     self.state = "ADVANCE"
+                    # Mark all LOs as demonstrated upon mastery
+                    for lo in student_node["lo_status"]:
+                        student_node["lo_status"][lo] = "demonstrated"
                 else:
                     # High quality response but BKT not yet at threshold
                     # Give another practice problem

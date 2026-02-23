@@ -471,6 +471,31 @@ class TestScenario6MasteryTracking:
         statuses = orch.student_node["lo_status"].values()
         assert "demonstrated" in statuses
 
+    def test_all_los_demonstrated_after_advance(self, fresh_orchestrator):
+        """When a student reaches ADVANCE, ALL LOs for the node must be 'demonstrated'."""
+        orch = fresh_orchestrator
+        assert orch.current_node == "element_stiffness"
+
+        # Drive through to ADVANCE
+        orch.process_evaluation(EVAL_MECHANICAL)       # ASSESS_PRIOR → MODEL
+        orch.state = "GUIDED_PRACTICE"
+        orch.process_evaluation(EVAL_PERFECT)           # scaff 3→2
+        orch.process_evaluation(EVAL_PERFECT)           # scaff 2→1
+        orch.process_evaluation(EVAL_PERFECT)           # scaff 1→ASSESS_MASTERY
+
+        safety = 0
+        while orch.state != "ADVANCE" and safety < 15:
+            orch.process_evaluation(EVAL_PERFECT)
+            safety += 1
+        assert orch.state == "ADVANCE"
+
+        # Every LO must be "demonstrated"
+        lo_status = orch.student_node["lo_status"]
+        for lo, status in lo_status.items():
+            assert status == "demonstrated", (
+                f"LO {lo} is '{status}' instead of 'demonstrated' after ADVANCE"
+            )
+
     def test_attempts_counter_increments(self, orchestrator_at_node):
         orch = orchestrator_at_node("element_stiffness", "GUIDED_PRACTICE", scaffolding=2)
         initial_attempts = orch.student_node["attempts"]

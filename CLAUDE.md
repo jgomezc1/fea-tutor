@@ -225,6 +225,22 @@ python main.py --resume data/student_alice.json --debug
 - Add multi-session memory and longitudinal tracking
 - Build a Streamlit or web UI
 
+## Interactive Teaching
+- teach.py: Live teaching sessions with Claude as teacher + evaluator
+- Usage: python teach.py --node <node> [--state <state>] [--student <id>]
+- Commands during session: /skip /repeat /state /node <n> /quit
+- Requires ANTHROPIC_API_KEY
+
+## Self-Test
+- selftest.py: Automated end-to-end testing with real Claude API evaluator calls
+- 5 scenarios: quick, misconception, scaffolding, full, persistence
+- Pre-written student responses calibrated to known quality levels
+- Usage: python selftest.py --scenario quick (or --all, or --dry-run)
+
+## Demo Runner
+- demo.py: Feature showcase for presentations. No API calls needed.
+- Usage: python demo.py [curriculum|state|notebook|executor|solver|persistence|context|all]
+
 ## Code Conventions
 - Type hints on all function signatures
 - Docstrings on all public functions
